@@ -42,7 +42,7 @@ def measure_coherence(model, texts, corpus, dictionary):
             % (u_mass, c_v, c_uci, c_npmi))
 
 
-def lda_topic_model(input_filename, keyword, *, num_topics, passes):
+def lda_topic_model(input_filename, keyword, size, *, num_topics, passes):
     cl.section('LDA Topic Model Training')
     cl.info('Keyword: %s' % keyword)
     cl.info('Number of topics: %s' % num_topics)
@@ -75,8 +75,9 @@ def lda_topic_model(input_filename, keyword, *, num_topics, passes):
     with TimeMeasure('vis_save'):
         cl.progress('Preparing visualization...')
         vis = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
-        htmlfilename = 'lda_vis-%s-%d-%d-%s.html' \
-            % (keyword, num_topics, passes, time.strftime('%Y%m%d%H%M%S'))
+        htmlfilename = 'ldavis-%s-%d-%d-%d-%s.html' \
+            % (keyword, size, num_topics, passes,
+               time.strftime('%Y%m%d%H%M%S'))
         htmlfilename = os.path.join('output', htmlfilename)
         pyLDAvis.save_html(vis, htmlfilename)
         cl.success('Visualized result saved in file: %s' % htmlfilename)
