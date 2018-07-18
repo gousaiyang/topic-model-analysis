@@ -1,0 +1,8 @@
+colorlabels
+python-twitter
+twitterscraper
+nltk
+stop-words
+pyldavis
+gensim
+python-decouple
