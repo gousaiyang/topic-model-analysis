@@ -7,12 +7,17 @@ from scraper import twapi_search, twscrape_search
 from util import export_csv
 
 
-def data_retriever(data_source, query, save_filename, lang='', twapi_max=None,
-                   twapi_sleep_time=0, twscrape_poolsize=20,
+def data_retriever(data_source, query, save_filename, lang='', proxy=None,
+                   twapi_max=None, twapi_sleep_time=0, twscrape_poolsize=20,
                    twscrape_begindate=None):
     cl.section('Twitter Data Retriever')
     cl.info('Starting to retrieve query: %s' % query)
     cl.info('From data source: %s' % data_source)
+    cl.info('Using proxy: %s' % proxy)
+
+    if proxy:
+        os.environ['HTTP_PROXY'] = proxy
+        os.environ['HTTPS_PROXY'] = proxy
 
     if data_source == 'official_standard_api':
         data = twapi_search(query, twapi_max, sleep_time=twapi_sleep_time,
