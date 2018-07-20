@@ -47,7 +47,7 @@ def sanitize_tokens(tokens):
             continue
 
         # Remove tokens that are only composed of numbers.
-        if all(c in string.digits for c in token):
+        if token.isnumeric():
             continue
 
         yield token

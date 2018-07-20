@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import time
@@ -42,18 +43,26 @@ def measure_coherence(model, texts, corpus, dictionary):
             % (u_mass, c_v, c_uci, c_npmi))
 
 
-def lda_topic_model(input_filename, keyword, size, *,
-                    num_topics, iterations=50, passes=1):
+def lda_topic_model(input_filename, keyword, size, *, num_topics,
+                    iterations=50, passes=1, chunksize=2000, eval_every=10,
+                    verbose=False):
     cl.section('LDA Topic Model Training')
     cl.info('Keyword: %s' % keyword)
     cl.info('Data size: %d' % size)
     cl.info('Number of topics: %d' % num_topics)
     cl.info('Iterations: %d' % iterations)
     cl.info('Passes: %d' % passes)
+    cl.info('Chunk size: %d' % chunksize)
+    cl.info('Eval every: %d' % eval_every)
+    cl.info('Verbose: %s' % verbose)
 
     assert re.fullmatch(r'[-_0-9a-zA-Z+]+', keyword)
 
     input_filename = data_source_file(input_filename)
+
+    if verbose:
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
+                            level=logging.DEBUG)
 
     with TimeMeasure('load_preprocessed_text'):
         with open(input_filename, 'r', encoding='utf-8') as infile:
@@ -68,7 +77,8 @@ def lda_topic_model(input_filename, keyword, size, *,
         cl.progress('Performing training...')
         ldamodel = LdaMulticore(corpus, workers=N_WORKERS, id2word=dictionary,
                                 num_topics=num_topics, iterations=iterations,
-                                passes=passes,
+                                passes=passes, chunksize=chunksize,
+                                eval_every=eval_every,
                                 alpha='symmetric', eta='auto')  # Other params?
         cl.success('Training finished.')
 
