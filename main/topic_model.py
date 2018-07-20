@@ -12,7 +12,7 @@ from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import TimeMeasure, data_source_file, report_file
+from util import TimeMeasure, data_source_file, model_file, report_file
 
 N_WORKERS = os.cpu_count()
 
@@ -72,6 +72,14 @@ def lda_topic_model(input_filename, keyword, size, *,
                                 alpha='symmetric', eta='auto')  # Other params?
         cl.success('Training finished.')
 
+    description = '%s-%d-%d-%dx%d-%s' % (keyword, size, num_topics, iterations,
+                                         passes, time.strftime('%Y%m%d%H%M%S'))
+
+    with TimeMeasure('save_model'):
+        modelfilename = 'ldamodel-%s' % description
+        ldamodel.save(model_file(modelfilename))
+        cl.success('Model saved as: %s' % modelfilename)
+
     with TimeMeasure('measure_coherence'):
         cl.progress('Measuring topic coherence...')
         measure_coherence(ldamodel, preprocessed_texts, corpus, dictionary)
@@ -79,9 +87,7 @@ def lda_topic_model(input_filename, keyword, size, *,
     with TimeMeasure('vis_save'):
         cl.progress('Preparing visualization...')
         vis = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
-        htmlfilename = 'ldavis-%s-%d-%d-%dx%d-%s.html' \
-            % (keyword, size, num_topics, iterations, passes,
-               time.strftime('%Y%m%d%H%M%S'))
+        htmlfilename = 'ldavis-%s.html' % description
         htmlfilename = report_file(htmlfilename)
         pyLDAvis.save_html(vis, htmlfilename)
         cl.success('Visualized result saved in file: %s' % htmlfilename)

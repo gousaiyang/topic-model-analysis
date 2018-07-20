@@ -4,7 +4,7 @@ import colorlabels as cl
 
 
 def export_csv(data, outfilename):
-    cl.progress('Exporting data to csv file "%s"' % (outfilename))
+    cl.progress('Exporting data to csv file: %s' % outfilename)
 
     it = iter(data)
     num_records = 0
