@@ -73,9 +73,9 @@ def preprocess_text(csvfilename, custom_stop_words=None):
         sanitized_text = sanitize_text(text)
         tokenized_text = tokenize(sanitized_text)
         sanitized_tokens = sanitize_tokens(tokenized_text)
-        stemmed_tokens = stem(sanitized_tokens)
-        stopped_tokens = remove_stop_words(stemmed_tokens, custom_stop_words)
-        result = list(stopped_tokens)
+        stopped_tokens = remove_stop_words(sanitized_tokens, custom_stop_words)
+        stemmed_tokens = stem(stopped_tokens)
+        result = list(stemmed_tokens)
 
         if result:
             yield result

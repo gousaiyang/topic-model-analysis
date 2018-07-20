@@ -42,11 +42,14 @@ def measure_coherence(model, texts, corpus, dictionary):
             % (u_mass, c_v, c_uci, c_npmi))
 
 
-def lda_topic_model(input_filename, keyword, size, *, num_topics, passes):
+def lda_topic_model(input_filename, keyword, size, *,
+                    num_topics, iterations=50, passes=1):
     cl.section('LDA Topic Model Training')
     cl.info('Keyword: %s' % keyword)
-    cl.info('Number of topics: %s' % num_topics)
-    cl.info('Passes: %s' % passes)
+    cl.info('Data size: %d' % size)
+    cl.info('Number of topics: %d' % num_topics)
+    cl.info('Iterations: %d' % iterations)
+    cl.info('Passes: %d' % passes)
 
     assert re.fullmatch(r'[-_0-9a-zA-Z+]+', keyword)
 
@@ -64,19 +67,20 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics, passes):
     with TimeMeasure('training'):
         cl.progress('Performing training...')
         ldamodel = LdaMulticore(corpus, workers=N_WORKERS, id2word=dictionary,
-                                num_topics=num_topics, passes=passes,
+                                num_topics=num_topics, iterations=iterations,
+                                passes=passes,
                                 alpha='symmetric', eta='auto')  # Other params?
         cl.success('Training finished.')
 
     with TimeMeasure('measure_coherence'):
-        cl.progress('Measuring topic measure_coherence...')
+        cl.progress('Measuring topic coherence...')
         measure_coherence(ldamodel, preprocessed_texts, corpus, dictionary)
 
     with TimeMeasure('vis_save'):
         cl.progress('Preparing visualization...')
         vis = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
-        htmlfilename = 'ldavis-%s-%d-%d-%d-%s.html' \
-            % (keyword, size, num_topics, passes,
+        htmlfilename = 'ldavis-%s-%d-%d-%dx%d-%s.html' \
+            % (keyword, size, num_topics, iterations, passes,
                time.strftime('%Y%m%d%H%M%S'))
         htmlfilename = os.path.join('output', htmlfilename)
         pyLDAvis.save_html(vis, htmlfilename)
