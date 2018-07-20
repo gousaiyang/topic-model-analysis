@@ -9,7 +9,7 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 
-from util import TimeMeasure
+from util import TimeMeasure, data_source_file
 
 tokenizer = RegexpTokenizer(r"[-_0-9a-zA-Z#*+&/']+")
 stop_words = get_stop_words('en')
@@ -93,7 +93,7 @@ def save_preprocessed(data, csvfilename):
 def text_preprocessor(input_filename, custom_stop_words=None):
     cl.section('Text Preprocessor')
 
-    input_filename = os.path.join('twdata', input_filename)
+    input_filename = data_source_file(input_filename)
 
     with TimeMeasure('preprocess_text'):
         result = list(preprocess_text(input_filename, custom_stop_words))

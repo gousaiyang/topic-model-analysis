@@ -4,7 +4,7 @@ import sys
 import colorlabels as cl
 
 from scraper import twapi_search, twscrape_search
-from util import export_csv
+from util import data_source_file, export_csv
 
 
 def data_retriever(data_source, query, save_filename, lang='', proxy=None,
@@ -29,4 +29,4 @@ def data_retriever(data_source, query, save_filename, lang='', proxy=None,
         cl.error('Data source %r is not implemented' % data_source)
         sys.exit(-1)
 
-    export_csv(data, os.path.join('twdata', save_filename))
+    export_csv(data, data_source_file(save_filename))

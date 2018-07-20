@@ -12,7 +12,7 @@ from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import TimeMeasure
+from util import TimeMeasure, data_source_file, report_file
 
 N_WORKERS = os.cpu_count()
 
@@ -53,7 +53,7 @@ def lda_topic_model(input_filename, keyword, size, *,
 
     assert re.fullmatch(r'[-_0-9a-zA-Z+]+', keyword)
 
-    input_filename = os.path.join('twdata', input_filename)
+    input_filename = data_source_file(input_filename)
 
     with TimeMeasure('load_preprocessed_text'):
         with open(input_filename, 'r', encoding='utf-8') as infile:
@@ -82,7 +82,7 @@ def lda_topic_model(input_filename, keyword, size, *,
         htmlfilename = 'ldavis-%s-%d-%d-%dx%d-%s.html' \
             % (keyword, size, num_topics, iterations, passes,
                time.strftime('%Y%m%d%H%M%S'))
-        htmlfilename = os.path.join('output', htmlfilename)
+        htmlfilename = report_file(htmlfilename)
         pyLDAvis.save_html(vis, htmlfilename)
         cl.success('Visualized result saved in file: %s' % htmlfilename)
 

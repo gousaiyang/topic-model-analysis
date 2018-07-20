@@ -1,5 +1,4 @@
 import json
-import os
 import re
 import time
 import urllib
@@ -8,9 +7,9 @@ import colorlabels as cl
 import twitter
 from decouple import config
 
-from util import merge_whitespaces
+from util import data_source_file, merge_whitespaces
 
-DEBUG_FILENAME = os.path.join('twdata', 'twdebug.txt')
+DEBUG_FILENAME = data_source_file('twdebug.txt')
 MAX_COUNT_PER_REQ = 100
 
 credentials = {
