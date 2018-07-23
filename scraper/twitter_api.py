@@ -7,9 +7,9 @@ import colorlabels as cl
 import twitter
 from decouple import config
 
-from util import data_source_file, merge_whitespaces
+from util import log_file, merge_whitespaces
 
-DEBUG_FILENAME = data_source_file('twdebug.txt')
+DEBUG_FILENAME = log_file('twdebug.log')
 MAX_COUNT_PER_REQ = 100
 
 credentials = {

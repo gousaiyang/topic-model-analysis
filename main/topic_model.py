@@ -13,7 +13,8 @@ from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import TimeMeasure, data_source_file, model_file, report_file
+from util import (TimeMeasure, data_source_file, log_file, model_file,
+                  report_file)
 
 N_WORKERS = os.cpu_count()
 
@@ -53,16 +54,20 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
     cl.info('Iterations: %d' % iterations)
     cl.info('Passes: %d' % passes)
     cl.info('Chunk size: %d' % chunksize)
-    cl.info('Eval every: %d' % eval_every)
+    cl.info('Eval every: %s' % eval_every)
     cl.info('Verbose: %s' % verbose)
 
     assert re.fullmatch(r'[-_0-9a-zA-Z+]+', keyword)
 
     input_filename = data_source_file(input_filename)
+    description = '%s-%d-%d-%dx%d-%s' % (keyword, size, num_topics, iterations,
+                                         passes, time.strftime('%Y%m%d%H%M%S'))
 
     if verbose:
+        log_filename = log_file('ldalog-%s.log' % description)
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
-                            level=logging.DEBUG)
+                            level=logging.DEBUG, filename=log_filename)
+        cl.info('Writing logs into file: %s' % log_filename)
 
     with TimeMeasure('load_preprocessed_text'):
         with open(input_filename, 'r', encoding='utf-8') as infile:
@@ -81,9 +86,6 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
                                 eval_every=eval_every,
                                 alpha='symmetric', eta='auto')  # Other params?
         cl.success('Training finished.')
-
-    description = '%s-%d-%d-%dx%d-%s' % (keyword, size, num_topics, iterations,
-                                         passes, time.strftime('%Y%m%d%H%M%S'))
 
     with TimeMeasure('save_model'):
         modelfilename = 'ldamodel-%s' % description

@@ -5,6 +5,7 @@ from decouple import config
 DATA_SOURCE_DIR = config('DATA_SOURCE_DIR')
 REPORT_DIR = config('REPORT_DIR')
 MODEL_DIR = config('MODEL_DIR')
+LOG_DIR = config('LOG_DIR')
 
 
 def data_source_file(filename):
@@ -17,3 +18,7 @@ def report_file(filename):
 
 def model_file(filename):
     return str(pathlib.Path(MODEL_DIR) / filename)
+
+
+def log_file(filename):
+    return str(pathlib.Path(LOG_DIR) / filename)
