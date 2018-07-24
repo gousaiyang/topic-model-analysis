@@ -1,12 +1,7 @@
 import functools
-import re
 import timeit
 
 import colorlabels as cl
-
-
-def merge_whitespaces(text):
-    return re.sub(r'\s+', ' ', text)
 
 
 def pretty_time(seconds):
