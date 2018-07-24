@@ -112,7 +112,7 @@ def preprocess_csv(csvfilename, *, preprocessor_cls=TextPreprocessor,
             result = preprocessor.preprocess(row['text'])
 
             if result:
-                yield result
+                yield row['id'], result
 
 
 def save_preprocessed(data, csvfilename):
