@@ -47,9 +47,9 @@ class TextPreprocessor:
     def _word_lemmatizer(self, tokens):
         for token in tokens:
             if any(re.fullmatch(p, token) for p in self._lem_ignore_patterns):
-                return token
+                yield token
             else:
-                return self._lemmatizer.lemmatize(token)
+                yield self._lemmatizer.lemmatize(token)
 
     def preprocess(self, text):
         sanitized_text = self._text_sanitizer(text)
@@ -63,7 +63,7 @@ class TextPreprocessor:
 
 class TwitterPreprocessor(TextPreprocessor):
     _token_regex = r"[-0-9a-zA-Z#+&']+"
-    _lem_ignore_patterns = r'\ws'
+    _lem_ignore_patterns = [r'\ws']
 
     def _text_sanitizer(self, text):
         text = remove_non_asciiprintable(text, ' ')
