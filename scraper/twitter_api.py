@@ -13,10 +13,10 @@ DEBUG_FILENAME = log_file('twdebug.log')
 MAX_COUNT_PER_REQ = 100
 
 credentials = {
-    'consumer_key': config('CONSUMER_KEY'),
-    'consumer_secret': config('CONSUMER_SECRET'),
-    'access_token_key': config('ACCESS_TOKEN_KEY'),
-    'access_token_secret': config('ACCESS_TOKEN_SECRET')
+    'consumer_key': config('TWITTER_CONSUMER_KEY'),
+    'consumer_secret': config('TWITTER_CONSUMER_SECRET'),
+    'access_token_key': config('TWITTER_ACCESS_TOKEN_KEY'),
+    'access_token_secret': config('TWITTER_ACCESS_TOKEN_SECRET')
 }
 
 twapi = twitter.Api(**credentials, application_only_auth=True)

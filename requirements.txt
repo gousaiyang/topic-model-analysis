@@ -6,3 +6,4 @@ stop-words
 pyldavis
 gensim
 python-decouple
+pygithub
