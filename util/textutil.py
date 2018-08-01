@@ -26,3 +26,11 @@ def remove_twitter_pic_urls(text, sub=''):
 
 def remove_emails(text, sub=''):
     return re.sub(EMAIL_PATTERN, sub, text)
+
+
+def remove_html_comments(text, sub=''):
+    return re.sub(r'<!--.*?-->', sub, text)
+
+
+def remove_markdown_codeblocks(text, sub=''):
+    return re.sub(r'```.*?```', sub, text)

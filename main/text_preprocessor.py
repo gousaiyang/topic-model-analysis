@@ -10,6 +10,7 @@ from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 
 from util import (TimeMeasure, data_source_file, remove_emails,
+                  remove_html_comments, remove_markdown_codeblocks,
                   remove_non_asciiprintable, remove_twitter_pic_urls,
                   remove_urls)
 
@@ -99,12 +100,56 @@ class TwitterPreprocessor(TextPreprocessor):
             yield token
 
 
+class GitHubPreprocessor(TextPreprocessor):
+    _token_regex = r"[-0-9a-zA-Z#+&']+"
+    _lem_ignore_patterns = [r'\ws']
+
+    def _text_sanitizer(self, text):
+        text = remove_non_asciiprintable(text, ' ')
+        text = remove_urls(text, ' ')
+        text = remove_emails(text, ' ')
+        text = remove_html_comments(text, ' ')
+        text = remove_markdown_codeblocks(text, ' ')
+        text = text.lower()
+        text = text.strip()
+        return text
+
+    def _token_sanitizer(self, tokens):
+        for token in tokens:
+            # Remove '#' in hashtags.
+            if token.startswith('#'):
+                token = token[1:]
+
+            # Remove "'s" and "'d" at end of token.
+            if token.endswith("'s") or token.endswith("'d"):
+                token = token[:-2]
+
+            # Remove quotes at start and end of token.
+            token = token.strip('\'"')
+
+            # Remove tokens that are only composed of special characters.
+            if all(c in string.punctuation for c in token):
+                continue
+
+            # Remove tokens that are only composed of numbers.
+            if token.isnumeric():
+                continue
+
+            # Remove one-character tokens, except 'c' and 'r'.
+            if len(token) == 1 and token not in ('c', 'r'):
+                continue
+
+            yield token
+
+
 def preprocess_csv(csvfilename, *, preprocessor_cls=TextPreprocessor,
                    custom_stop_words=None, lem_ignore_patterns=None):
     cl.progress('Preprocessing file: %s' % csvfilename)
 
     preprocessor = preprocessor_cls(custom_stop_words=custom_stop_words,
                                     lem_ignore_patterns=lem_ignore_patterns)
+
+    csv.field_size_limit(262144)
 
     with open(csvfilename, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
