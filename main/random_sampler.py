@@ -2,9 +2,9 @@ import csv
 import random
 
 import colorlabels as cl
-from decouple import config
 
-from util import data_source_file, export_csv, name_with_title_suffix
+from util import (data_source_file, export_csv, name_with_title_suffix,
+                  set_csv_field_size_limit)
 
 
 def random_sampler(csvfilename, amount):
@@ -14,7 +14,7 @@ def random_sampler(csvfilename, amount):
 
     csvfilename = data_source_file(csvfilename)
 
-    csv.field_size_limit(config('CSV_FIELD_SIZE_LIMIT', cast=int))
+    set_csv_field_size_limit()
 
     with open(csvfilename, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)

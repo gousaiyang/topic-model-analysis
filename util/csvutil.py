@@ -1,6 +1,7 @@
 import csv
 
 import colorlabels as cl
+from decouple import config
 
 
 def export_csv(data, outfilename):
@@ -30,3 +31,7 @@ def export_csv(data, outfilename):
             cl.warning('User hit Ctrl-C, flushing data...')
 
     cl.success('%d record(s) saved to csv file.' % num_records)
+
+
+def set_csv_field_size_limit():
+    csv.field_size_limit(config('CSV_FIELD_SIZE_LIMIT', cast=int))
