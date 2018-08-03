@@ -1,0 +1,18 @@
+import os
+
+from main import main_module_function_to_call
+from util import TimeMeasure
+
+
+def main():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    arg1 = SET_YOUR_VALUE_OF_ARG1
+    kwarg2 = SET_YOUR_VALUE_OF_KWARG2
+
+    main_module_function_to_call(arg1, kwarg2=kwarg2)
+
+
+if __name__ == '__main__':
+    with TimeMeasure('main_module_function_to_call'):
+        main()

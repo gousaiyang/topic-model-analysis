@@ -5,14 +5,15 @@ import re
 import string
 
 import colorlabels as cl
+from decouple import config
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 
-from util import (TimeMeasure, data_source_file, remove_emails,
-                  remove_html_comments, remove_markdown_codeblocks,
-                  remove_non_asciiprintable, remove_twitter_pic_urls,
-                  remove_urls)
+from util import (TimeMeasure, data_source_file, name_replace_ext,
+                  remove_emails, remove_html_comments,
+                  remove_markdown_codeblocks, remove_non_asciiprintable,
+                  remove_twitter_pic_urls, remove_urls)
 
 
 class TextPreprocessor:
@@ -149,7 +150,7 @@ def preprocess_csv(csvfilename, *, preprocessor_cls=TextPreprocessor,
     preprocessor = preprocessor_cls(custom_stop_words=custom_stop_words,
                                     lem_ignore_patterns=lem_ignore_patterns)
 
-    csv.field_size_limit(262144)
+    csv.field_size_limit(config('CSV_FIELD_SIZE_LIMIT', cast=int))
 
     with open(csvfilename, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -170,7 +171,7 @@ def remove_duplicate_text(data):
 
 
 def save_preprocessed(data, csvfilename):
-    output_filename = os.path.splitext(csvfilename)[0] + '.prep.json'
+    output_filename = name_replace_ext(csvfilename, '.prep.json')
 
     with open(output_filename, 'w', encoding='utf-8') as outfile:
         json.dump(data, outfile)

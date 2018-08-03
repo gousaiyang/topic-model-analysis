@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 from decouple import config
@@ -22,3 +23,12 @@ def model_file(filename):
 
 def log_file(filename):
     return str(pathlib.Path(LOG_DIR) / filename)
+
+
+def name_replace_ext(filename, newext):
+    return os.path.splitext(filename)[0] + newext
+
+
+def name_with_title_suffix(filename, suffix):
+    title, ext = os.path.splitext(filename)
+    return title + suffix + ext

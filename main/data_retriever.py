@@ -4,7 +4,7 @@ import sys
 import colorlabels as cl
 
 from scraper import github_issue_org_fetch, twapi_search, twscrape_search
-from util import data_source_file, export_csv
+from util import data_source_file, export_csv, name_with_title_suffix
 
 
 def iterator_aggregate_list(data):
@@ -63,7 +63,6 @@ def data_retriever(data_source, query, save_filename, lang='', proxy=None,
     cl.info('Exporting data without duplicate text')
     export_csv(data_no_duplicate_text, data_source_file(save_filename))
 
-    title, ext = os.path.splitext(save_filename)
-    save_filename_full = title + '-full' + ext
+    save_filename_full = name_with_title_suffix(save_filename, '-full')
     cl.info('Exporting full data')
     export_csv(data, data_source_file(save_filename_full))
