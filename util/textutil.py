@@ -34,3 +34,17 @@ def remove_html_comments(text, sub=''):
 
 def remove_markdown_codeblocks(text, sub=''):
     return re.sub(r'```.*?```', sub, text)
+
+
+def rank(x):
+    assert isinstance(x, int)
+    assert x > 0
+
+    if x % 10 == 1 and x % 100 != 11:
+        return '%dst' % x
+    elif x % 10 == 2 and x % 100 != 12:
+        return '%dnd' % x
+    elif x % 10 == 3 and x % 100 != 13:
+        return '%drd' % x
+    else:
+        return '%dth' % x
