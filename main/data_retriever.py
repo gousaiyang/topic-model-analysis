@@ -7,6 +7,33 @@ from scraper import github_issue_org_fetch, twapi_search, twscrape_search
 from util import data_source_file, export_csv
 
 
+def iterator_aggregate_list(data):
+    if hasattr(data, '__next__'):
+        result = []
+
+        try:
+            result.extend(data)
+        except Exception as e:
+            cl.warning('Exception happened while collecting data: %s' % e)
+        except KeyboardInterrupt:
+            cl.warning('User hit Ctrl-C. Will not collect more data.')
+
+        return result
+    elif isinstance(data, list):
+        return data
+    else:
+        return list(data)
+
+
+def remove_duplicate_text(data):
+    seen = set()
+
+    for item in data:
+        if item['text'] not in seen:
+            seen.add(item['text'])
+            yield item
+
+
 def data_retriever(data_source, query, save_filename, lang='', proxy=None,
                    twapi_max=None, twapi_sleep_time=0, twscrape_poolsize=20,
                    twscrape_begindate=None, ghapi_org=None, ghapi_since=None):
@@ -31,4 +58,12 @@ def data_retriever(data_source, query, save_filename, lang='', proxy=None,
         cl.error('Data source %r is not implemented' % data_source)
         sys.exit(-1)
 
-    export_csv(data, data_source_file(save_filename))
+    data = iterator_aggregate_list(data)
+    data_no_duplicate_text = remove_duplicate_text(data)
+    cl.info('Exporting data without duplicate text')
+    export_csv(data_no_duplicate_text, data_source_file(save_filename))
+
+    title, ext = os.path.splitext(save_filename)
+    save_filename_full = title + '-full' + ext
+    cl.info('Exporting full data')
+    export_csv(data, data_source_file(save_filename_full))

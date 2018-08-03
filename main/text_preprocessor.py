@@ -58,7 +58,7 @@ class TextPreprocessor:
         sanitized_tokens = self._token_sanitizer(tokenized_text)
         stopped_tokens = self._stop_words_remover(sanitized_tokens)
         lemmatized_tokens = self._word_lemmatizer(stopped_tokens)
-        result = list(lemmatized_tokens)
+        result = tuple(lemmatized_tokens)
         return result
 
 
@@ -160,6 +160,15 @@ def preprocess_csv(csvfilename, *, preprocessor_cls=TextPreprocessor,
                 yield row['id'], result
 
 
+def remove_duplicate_text(data):
+    seen = set()
+
+    for item in data:
+        if item[1] not in seen:
+            seen.add(item[1])
+            yield item
+
+
 def save_preprocessed(data, csvfilename):
     output_filename = os.path.splitext(csvfilename)[0] + '.prep.json'
 
@@ -181,7 +190,9 @@ def text_preprocessor(input_filename, *, preprocessor_cls='TextPreprocessor',
                                 preprocessor_cls=preprocessor_cls,
                                 custom_stop_words=custom_stop_words,
                                 lem_ignore_patterns=lem_ignore_patterns)
-        result = list(result)
+        result = remove_duplicate_text(result)
+        result = tuple(result)
+        cl.info('Effective data size: %d' % len(result))
 
     with TimeMeasure('save_preprocessed'):
         save_preprocessed(result, input_filename)
