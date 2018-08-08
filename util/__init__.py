@@ -1,3 +1,4 @@
+from .consoleutil import *
 from .csvutil import *
 from .pathutil import *
 from .textutil import *

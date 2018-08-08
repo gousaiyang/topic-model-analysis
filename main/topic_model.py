@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import webbrowser
 from urllib.request import pathname2url
@@ -13,8 +14,8 @@ from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import (TimeMeasure, data_source_file, log_file, model_file,
-                  report_file)
+from util import (NoConsoleOutput, TimeMeasure, data_source_file, log_file,
+                  model_file, report_file)
 
 N_WORKERS = os.cpu_count()
 
@@ -46,8 +47,8 @@ def measure_coherence(model, texts, corpus, dictionary):
 
 def lda_topic_model(input_filename, keyword, size, *, num_topics,
                     iterations=50, passes=1, chunksize=2000, eval_every=10,
-                    verbose=False, filter_no_below=5, filter_no_above=0.5,
-                    filter_keep_n=100000):
+                    verbose=False, gamma_threshold=0.001, filter_no_below=5,
+                    filter_no_above=0.5, filter_keep_n=100000):
     cl.section('LDA Topic Model Training')
     cl.info('Keyword: %s' % keyword)
     cl.info('Data size: %d' % size)
@@ -57,6 +58,7 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
     cl.info('Chunk size: %d' % chunksize)
     cl.info('Eval every: %s' % eval_every)
     cl.info('Verbose: %s' % verbose)
+    cl.info('Gamma Threshold: %f' % gamma_threshold)
     cl.info('Filter no below: %d' % filter_no_below)
     cl.info('Filter no above: %f' % filter_no_above)
     cl.info('Filter keep n: %d' % filter_keep_n)
@@ -98,11 +100,15 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
 
     with TimeMeasure('training'):
         cl.progress('Performing training...')
-        ldamodel = LdaMulticore(corpus, workers=N_WORKERS, id2word=dictionary,
-                                num_topics=num_topics, iterations=iterations,
-                                passes=passes, chunksize=chunksize,
-                                eval_every=eval_every,
-                                alpha='symmetric', eta='auto')  # Other params?
+
+        with NoConsoleOutput():
+            ldamodel = LdaMulticore(corpus, workers=N_WORKERS,
+                                    id2word=dictionary, num_topics=num_topics,
+                                    iterations=iterations, passes=passes,
+                                    chunksize=chunksize, eval_every=eval_every,
+                                    gamma_threshold=gamma_threshold,
+                                    alpha='symmetric', eta='auto')
+
         cl.success('Training finished.')
 
     with TimeMeasure('save_model'):
