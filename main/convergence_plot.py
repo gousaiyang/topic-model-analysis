@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from util import log_file
 
 
-def parse_metrics(logfilename):
+def parse_log(logfilename):
     with open(logfilename, 'r', encoding='utf-8') as logfile:
         text = logfile.read()
 
@@ -13,16 +13,20 @@ def parse_metrics(logfilename):
     return [float(item[1]) for item in result]
 
 
-def plot_metric(data, metric_name, modeldesc):
+def plot_one(data, label):
     list_x = list(range(len(data)))
-    plt.plot(list_x, data)
+    plt.plot(list_x, data, label=label)
+
+
+def convergence_plot(modeldescs):
+    plt.title('Topic Model Convergence Plot')
     plt.xlabel('passes')
-    plt.ylabel(metric_name)
-    plt.title('Topic Model Convergence Plot\nModel: %s' % modeldesc)
+    plt.ylabel('perplexity')
+
+    for modeldesc in modeldescs:
+        logfilename = log_file('ldalog-%s.log' % modeldesc)
+        data = parse_log(logfilename)
+        plot_one(data, modeldesc.split('-')[-1])
+
+    plt.legend()
     plt.show()
-
-
-def convergence_plot(modeldesc):
-    logfilename = log_file('ldalog-%s.log' % modeldesc)
-    data = parse_metrics(logfilename)
-    plot_metric(data, 'perplexity', modeldesc)
