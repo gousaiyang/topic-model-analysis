@@ -7,3 +7,4 @@ pyldavis
 gensim
 python-decouple
 pygithub
+matplotlib
