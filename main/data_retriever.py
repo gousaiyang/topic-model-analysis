@@ -3,7 +3,8 @@ import sys
 
 import colorlabels as cl
 
-from scraper import github_issue_org_fetch, twapi_search, twscrape_search
+from scraper import (github_issue_org_fetch, soapi_search, twapi_search,
+                     twscrape_search)
 from util import data_source_file, export_csv, name_with_title_suffix
 
 
@@ -36,7 +37,8 @@ def remove_duplicate_text(data):
 
 def data_retriever(data_source, query, save_filename, lang='', proxy=None,
                    twapi_max=None, twapi_sleep_time=0, twscrape_poolsize=20,
-                   twscrape_begindate=None, ghapi_org=None, ghapi_since=None):
+                   twscrape_begindate=None, ghapi_org=None, ghapi_since=None,
+                   soapi_begindate=None):
     cl.section('Data Retriever')
     cl.info('Starting to retrieve query: %s, or org: %s' % (query, ghapi_org))
     cl.info('From data source: %s' % data_source)
@@ -54,6 +56,8 @@ def data_retriever(data_source, query, save_filename, lang='', proxy=None,
                                begindate=twscrape_begindate)
     elif data_source == 'github_api':
         data = github_issue_org_fetch(ghapi_org, ghapi_since)
+    elif data_source == 'stackoverflow_api':
+        data = soapi_search(query, begindate=soapi_begindate)
     else:
         cl.error('Data source %r is not implemented' % data_source)
         sys.exit(-1)

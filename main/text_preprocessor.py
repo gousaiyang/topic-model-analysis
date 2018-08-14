@@ -1,4 +1,5 @@
 import csv
+import html
 import json
 import os
 import re
@@ -127,6 +128,40 @@ class GitHubPreprocessor(TextPreprocessor):
 
             # Remove quotes at start and end of token.
             token = token.strip('\'"')
+
+            # Remove tokens that are only composed of special characters.
+            if all(c in string.punctuation for c in token):
+                continue
+
+            # Remove tokens that are only composed of numbers.
+            if token.isnumeric():
+                continue
+
+            # Remove one-character tokens, except 'c' and 'r'.
+            if len(token) == 1 and token not in ('c', 'r'):
+                continue
+
+            yield token
+
+
+class StackOverflowPreprocessor(TextPreprocessor):
+    _token_regex = r"[-0-9a-zA-Z#+&']+"
+    _lem_ignore_patterns = [r'\ws']
+
+    def _text_sanitizer(self, text):
+        text = html.unescape(text)
+        text = remove_non_asciiprintable(text, ' ')
+        text = remove_urls(text, ' ')
+        text = remove_emails(text, ' ')
+        text = text.lower()
+        text = text.strip()
+        return text
+
+    def _token_sanitizer(self, tokens):
+        for token in tokens:
+            # Remove "'s" and "'d" at end of token.
+            if token.endswith("'s") or token.endswith("'d"):
+                token = token[:-2]
 
             # Remove tokens that are only composed of special characters.
             if all(c in string.punctuation for c in token):
