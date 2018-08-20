@@ -19,7 +19,8 @@ credentials = {
     'access_token_secret': config('TWITTER_ACCESS_TOKEN_SECRET')
 }
 
-twapi = twitter.Api(**credentials, application_only_auth=True)
+twapi = twitter.Api(**credentials, application_only_auth=True,
+                    sleep_on_rate_limit=True)
 
 
 def get_full_text(tweet):
