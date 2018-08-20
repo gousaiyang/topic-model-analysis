@@ -1,5 +1,6 @@
 import os
 import pathlib
+import re
 
 from decouple import config
 
@@ -32,3 +33,21 @@ def name_replace_ext(filename, newext):
 def name_with_title_suffix(filename, suffix):
     title, ext = os.path.splitext(filename)
     return title + suffix + ext
+
+
+def is_bad_filename(filename):
+    if not filename:
+        return True
+
+    filename = filename.lower()
+
+    if re.search(r'[<>:"/\\|?*\x00-\x1f]', filename):
+        return True
+
+    if re.fullmatch(r'con|prn|aux|nul|com[1-9]|lpt[1-9]', filename):
+        return True
+
+    if filename[-1] in ('.', ' '):
+        return True
+
+    return False
