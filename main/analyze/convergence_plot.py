@@ -1,32 +1,18 @@
-import re
-
 import matplotlib.pyplot as plt
 
-from util import log_file
+from util import parse_data_from_log
 
 
-def parse_log(logfilename):
-    with open(logfilename, 'r', encoding='utf-8') as logfile:
-        text = logfile.read()
-
-    result = re.findall(r'(\S+) per-word bound, (\S+) perplexity', text)
-    return [float(item[1]) for item in result]
-
-
-def plot_one(data, label):
-    list_x = list(range(len(data)))
-    plt.plot(list_x, data, label=label)
-
-
-def convergence_plot(modeldescs):
+def convergence_plot(logfiles, labels, *, regex_x=None, regex_y):
     plt.title('Topic Model Convergence Plot')
-    plt.xlabel('passes')
+    plt.xlabel('iterations')
     plt.ylabel('perplexity')
 
-    for modeldesc in modeldescs:
-        logfilename = log_file('ldalog-%s.log' % modeldesc)
-        data = parse_log(logfilename)
-        plot_one(data, modeldesc.split('-')[-1])
+    for logfile, label in zip(logfiles, labels):
+        data_x, data_y = parse_data_from_log(logfile, regex_x=regex_x,
+                                             regex_y=regex_y, cast_x=int,
+                                             cast_y=float)
+        plt.plot(data_x, data_y, label=label)
 
     plt.legend()
     plt.show()
