@@ -1,9 +1,12 @@
 import os
+import platform
+import shlex
 import sys
 
 stdout_backup = None
 stderr_backup = None
 devnull = None
+is_windows = platform.system() == 'Windows'
 
 
 def disable_console_output():
@@ -43,3 +46,21 @@ class NoConsoleOutput:
 
     def __exit__(self, type_, value, trace):
         enable_console_output()
+
+
+def escape_param(s):
+    if is_windows:
+        return "'%s'" % s.replace("'", "''")  # For PowerShell
+    else:
+        return shlex.quote(s)
+
+
+def exec_shell(s):
+    if is_windows:
+        return ['powershell', s]
+    else:
+        return ['/bin/sh', '-c', s]
+
+
+def tee_command(command, filename):
+    return exec_shell(command + ' 2>&1 | tee ' + escape_param(filename))

@@ -1,6 +1,7 @@
 import collections
 import csv
 import os
+import re
 import shutil
 import string
 
@@ -65,6 +66,8 @@ def save_preprocessed(data, sourcedesc):
 
 def text_preprocessor_twlda(sourcedesc):
     cl.section('Text Preprocessor For Twitter-LDA')
+
+    assert re.fullmatch(r'[-_0-9a-zA-Z+]+', sourcedesc)
 
     input_filename = data_source_file('%s.csv' % sourcedesc)
 
