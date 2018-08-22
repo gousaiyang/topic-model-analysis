@@ -1,5 +1,4 @@
 import collections
-import csv
 import os
 import re
 import shutil
@@ -7,8 +6,7 @@ import string
 
 import colorlabels as cl
 
-from util import (TimeMeasure, data_source_file, is_bad_filename,
-                  set_csv_field_size_limit)
+from util import TimeMeasure, csv_reader, data_source_file, is_bad_filename
 
 from .text_preprocessor import TwitterPreprocessor
 
@@ -32,13 +30,10 @@ def preprocess_csv(csvfilename):
     cl.progress('Preprocessing file: %s' % csvfilename)
     preprocessor = TWLDAPreprocessor()
     grouped_tweets = collections.defaultdict(list)
-    set_csv_field_size_limit()
 
-    with open(csvfilename, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            result = preprocessor.preprocess(row['text'])
-            grouped_tweets[row['user']].append(result)
+    for row in csv_reader(csvfilename):
+        result = preprocessor.preprocess(row['text'])
+        grouped_tweets[row['user']].append(result)
 
     return grouped_tweets
 

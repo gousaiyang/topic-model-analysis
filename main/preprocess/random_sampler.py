@@ -1,10 +1,9 @@
-import csv
 import random
 
 import colorlabels as cl
 
-from util import (data_source_file, export_csv, name_with_title_suffix,
-                  set_csv_field_size_limit)
+from util import (csv_reader, data_source_file, export_csv,
+                  name_with_title_suffix)
 
 
 def random_sampler(csvfilename, amount):
@@ -13,12 +12,7 @@ def random_sampler(csvfilename, amount):
     cl.info('Amount: %d' % amount)
 
     csvfilename = data_source_file(csvfilename)
-
-    set_csv_field_size_limit()
-
-    with open(csvfilename, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        data = [row for row in reader]
+    data = list(csv_reader(csvfilename))
 
     random.shuffle(data)
     data = data[:amount]

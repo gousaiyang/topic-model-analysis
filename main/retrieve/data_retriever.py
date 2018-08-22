@@ -35,14 +35,15 @@ def remove_duplicate_text(data):
             yield item
 
 
-def data_retriever(data_source, query, save_filename, lang='', proxy=None,
-                   twapi_max=None, twapi_sleep_time=0, twscrape_poolsize=20,
-                   twscrape_begindate=None, ghapi_org=None, ghapi_since=None,
-                   soapi_begindate=None):
+def data_retriever(data_source, query, save_filename, *, lang='', proxy=None,
+                   remove_duplicates=False, twapi_max=None, twapi_sleep_time=0,
+                   twscrape_poolsize=20, twscrape_begindate=None,
+                   ghapi_org=None, ghapi_since=None, soapi_begindate=None):
     cl.section('Data Retriever')
     cl.info('Starting to retrieve query: %s, or org: %s' % (query, ghapi_org))
     cl.info('From data source: %s' % data_source)
     cl.info('Using proxy: %s' % proxy)
+    cl.info('Remove duplicates: %s' % remove_duplicates)
 
     if proxy:
         os.environ['HTTP_PROXY'] = proxy
@@ -62,11 +63,14 @@ def data_retriever(data_source, query, save_filename, lang='', proxy=None,
         cl.error('Data source %r is not implemented' % data_source)
         sys.exit(-1)
 
-    data = iterator_aggregate_list(data)
-    data_no_duplicate_text = remove_duplicate_text(data)
-    cl.info('Exporting data without duplicate text')
-    export_csv(data_no_duplicate_text, data_source_file(save_filename))
+    if remove_duplicates:
+        data = iterator_aggregate_list(data)
+        data_no_duplicate_text = remove_duplicate_text(data)
+        cl.info('Exporting data without duplicate text')
+        export_csv(data_no_duplicate_text, data_source_file(save_filename))
 
-    save_filename_full = name_with_title_suffix(save_filename, '-full')
-    cl.info('Exporting full data')
-    export_csv(data, data_source_file(save_filename_full))
+        save_filename_full = name_with_title_suffix(save_filename, '-full')
+        cl.info('Exporting full data')
+        export_csv(data, data_source_file(save_filename_full))
+    else:
+        export_csv(data, data_source_file(save_filename))

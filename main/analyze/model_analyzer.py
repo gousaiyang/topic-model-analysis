@@ -1,12 +1,11 @@
 import collections
-import csv
 import json
 
 import colorlabels as cl
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import (TimeMeasure, data_source_file, model_file, rank, report_file,
-                  set_csv_field_size_limit)
+from util import (TimeMeasure, csv_reader, data_source_file, model_file, rank,
+                  report_file)
 
 
 def load_all(modeldesc, sourcedesc):
@@ -21,12 +20,9 @@ def load_all(modeldesc, sourcedesc):
     with open(prepfilename, 'r', encoding='utf-8') as prepfile:
         prep_items = json.load(prepfile)
 
-    set_csv_field_size_limit()
-
     sourcefilename = data_source_file(sourcedesc + '.csv')
-    with open(sourcefilename, newline='', encoding='utf-8') as sourcefile:
-        reader = csv.DictReader(sourcefile)
-        source_texts = {row['id']: row['text'] for row in reader}
+    reader = csv_reader(sourcefilename)
+    source_texts = {row['id']: row['text'] for row in reader}
 
     return ldamodel, corpus, prep_items, source_texts
 

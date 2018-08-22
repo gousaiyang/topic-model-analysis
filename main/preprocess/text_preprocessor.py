@@ -1,4 +1,3 @@
-import csv
 import html
 import json
 import os
@@ -10,11 +9,10 @@ from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 
-from util import (TimeMeasure, data_source_file, name_replace_ext,
+from util import (TimeMeasure, csv_reader, data_source_file, name_replace_ext,
                   remove_emails, remove_html_comments,
                   remove_markdown_codeblocks, remove_non_asciiprintable,
-                  remove_twitter_pic_urls, remove_urls,
-                  set_csv_field_size_limit)
+                  remove_twitter_pic_urls, remove_urls)
 
 
 class TextPreprocessor:
@@ -185,15 +183,11 @@ def preprocess_csv(csvfilename, *, preprocessor_cls=TextPreprocessor,
     preprocessor = preprocessor_cls(custom_stop_words=custom_stop_words,
                                     lem_ignore_patterns=lem_ignore_patterns)
 
-    set_csv_field_size_limit()
+    for row in csv_reader(csvfilename):
+        result = preprocessor.preprocess(row['text'])
 
-    with open(csvfilename, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            result = preprocessor.preprocess(row['text'])
-
-            if result:
-                yield row['id'], result
+        if result:
+            yield row['id'], result
 
 
 def remove_duplicate_text(data):
@@ -215,7 +209,8 @@ def save_preprocessed(data, csvfilename):
 
 
 def text_preprocessor(input_filename, *, preprocessor_cls='TextPreprocessor',
-                      custom_stop_words=None, lem_ignore_patterns=None):
+                      custom_stop_words=None, lem_ignore_patterns=None,
+                      remove_duplicates=False):
     cl.section('Text Preprocessor')
 
     input_filename = data_source_file(input_filename)
@@ -226,7 +221,10 @@ def text_preprocessor(input_filename, *, preprocessor_cls='TextPreprocessor',
                                 preprocessor_cls=preprocessor_cls,
                                 custom_stop_words=custom_stop_words,
                                 lem_ignore_patterns=lem_ignore_patterns)
-        result = remove_duplicate_text(result)
+
+        if remove_duplicates:
+            result = remove_duplicate_text(result)
+
         result = tuple(result)
         cl.info('Effective data size: %d' % len(result))
 

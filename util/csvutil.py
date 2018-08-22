@@ -3,8 +3,20 @@ import csv
 import colorlabels as cl
 from decouple import config
 
+CSV_FIELD_SIZE_LIMIT = config('CSV_FIELD_SIZE_LIMIT', cast=int)
 
-def export_csv(data, outfilename):
+
+def csv_reader(csvfilename, encoding='utf-8'):
+    csv.field_size_limit(CSV_FIELD_SIZE_LIMIT)
+
+    with open(csvfilename, newline='', encoding=encoding) as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            yield row
+
+
+def export_csv(data, outfilename, encoding='utf-8'):
     cl.progress('Exporting data to csv file: %s' % outfilename)
 
     it = iter(data)
@@ -18,7 +30,7 @@ def export_csv(data, outfilename):
     else:
         num_records += 1
 
-    with open(outfilename, 'w', newline='', encoding='utf-8') as csvfile:
+    with open(outfilename, 'w', newline='', encoding=encoding) as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=first_item.keys())
         writer.writeheader()
         writer.writerow(first_item)
@@ -31,7 +43,3 @@ def export_csv(data, outfilename):
             cl.warning('User hit Ctrl-C, flushing data...')
 
     cl.success('%d record(s) saved to csv file.' % num_records)
-
-
-def set_csv_field_size_limit():
-    csv.field_size_limit(config('CSV_FIELD_SIZE_LIMIT', cast=int))
