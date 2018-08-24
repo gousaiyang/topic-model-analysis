@@ -8,6 +8,7 @@ DATA_SOURCE_DIR = pathlib.Path(config('DATA_SOURCE_DIR'))
 REPORT_DIR = pathlib.Path(config('REPORT_DIR'))
 MODEL_DIR = pathlib.Path(config('MODEL_DIR'))
 LOG_DIR = pathlib.Path(config('LOG_DIR'))
+VISUAL_DIR = pathlib.Path(config('VISUAL_DIR'))
 TWLDA_BASE_DIR = pathlib.Path(config('TWLDA_BASE_DIR'))
 TWLDA_DATA_DIR = pathlib.Path(config('TWLDA_DATA_DIR'))
 TWLDA_SOURCE_DIR = pathlib.Path(config('TWLDA_SOURCE_DIR'))
@@ -28,6 +29,10 @@ def model_file(filename):
 
 def log_file(filename):
     return str(LOG_DIR / filename)
+
+
+def visual_file(filename):
+    return str(VISUAL_DIR / filename)
 
 
 def twlda_base_file(filename):

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="renderer" content="webkit">
+
+        <title>Topic Distribution</title>
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    </head>
+
+    <body>
+        <div id="app">
+            <nav class="navbar navbar-light" style="background-color: #59f;">
+                <div class="container">
+                    <span class="navbar-brand mb-0 h1">Topic Distribution - {{ title }}</span>
+                </div>
+            </nav>
+            <div class="container" style="margin-top: 15px;">
+                <table id="topicTable" class="table table-hover" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>ID</th>
+                            <th>Weight</th>
+                            <th>Top Words</th>
+                            <th>Top Users</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="topic in topics">
+                            <td>{{ topic.rank }}</td>
+                            <td>{{ topic.id }}</td>
+                            <td>{{ topic.weight }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="topic.words.join(', ')">
+                                <span v-for="word in topic.words.slice(0, 8)">
+                                    <span class="badge badge-info" >{{ word }}</span>&nbsp;
+                                </span>
+                            </td>
+                            <td>
+                                <span v-for="user in topic.users.slice(0, 8)">
+                                    <a href="#" class="badge badge-success" data-toggle="modal" data-target="#userTweetsModal" @click="currentUser=user">
+                                        {{ user.username }}
+                                    </a>
+                                    &nbsp;
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal fade" id="userTweetsModal" tabindex="-1" role="dialog" aria-labelledby="userTweetsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userTweetsModalLabel">User Tweets - {{ currentUser.username }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body"><pre>{{ currentUser.text }}</pre></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <script>
+        var data = {title: 'Template', topics: [], currentUser: {}}; // To be generated.
+    </script>
+
+    <script>
+        $(function () {
+            var app = new Vue({
+                el: '#app',
+                data: data
+            });
+
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#topicTable').DataTable();
+        });
+    </script>
+</html>

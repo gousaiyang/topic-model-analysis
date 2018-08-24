@@ -48,3 +48,7 @@ def rank(x):
         return '%drd' % x
     else:
         return '%dth' % x
+
+
+def re_sub_literal(pattern, repl, string):
+    return re.sub(pattern, repl.replace('\\', r'\\'), string)
