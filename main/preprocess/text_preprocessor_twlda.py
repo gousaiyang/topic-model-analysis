@@ -6,7 +6,8 @@ import string
 
 import colorlabels as cl
 
-from util import TimeMeasure, csv_reader, data_source_file, is_bad_filename
+from util import (TimeMeasure, csv_reader, data_source_file, is_bad_filename,
+                  twlda_data_file, twlda_source_file)
 
 from .text_preprocessor import TwitterPreprocessor
 
@@ -26,20 +27,29 @@ class TWLDAPreprocessor(TwitterPreprocessor):
         return ' '.join(sanitized_tokens)
 
 
-def preprocess_csv(csvfilename):
+def preprocess_csv(csvfilename, tweet_min_length, user_min_tweets,
+                   remove_duplicates):
     cl.progress('Preprocessing file: %s' % csvfilename)
     preprocessor = TWLDAPreprocessor()
     grouped_tweets = collections.defaultdict(list)
 
     for row in csv_reader(csvfilename):
+        user = row['user']
         result = preprocessor.preprocess(row['text'])
-        grouped_tweets[row['user']].append(result)
 
+        if len(result) >= tweet_min_length:
+            if remove_duplicates and result in grouped_tweets[user]:
+                continue
+
+            grouped_tweets[user].append(result)
+
+    grouped_tweets = {u: t for u, t in grouped_tweets.items()
+                      if len(t) >= user_min_tweets}
     return grouped_tweets
 
 
-def save_preprocessed(data, sourcedesc):
-    output_dir = data_source_file('twlda-%s' % sourcedesc)
+def save_preprocessed(data):
+    output_dir = twlda_source_file('test')
     shutil.rmtree(output_dir, ignore_errors=True)
     os.mkdir(output_dir)
 
@@ -51,7 +61,7 @@ def save_preprocessed(data, sourcedesc):
             for tweet in tweets:
                 outfile.write('%s\n' % tweet)
 
-    manifest_filename = data_source_file('twlda-manifest-%s.txt' % sourcedesc)
+    manifest_filename = twlda_data_file('filelist_test.txt')
     with open(manifest_filename, 'w', encoding='utf-8') as manifestfile:
         for name in os.listdir(output_dir):
             manifestfile.write('%s\n' % name)
@@ -59,7 +69,8 @@ def save_preprocessed(data, sourcedesc):
     cl.success('Preprocessed result saved in folder: %s' % output_dir)
 
 
-def text_preprocessor_twlda(sourcedesc):
+def text_preprocessor_twlda(sourcedesc, *, tweet_min_length=3,
+                            user_min_tweets=1, remove_duplicates=False):
     cl.section('Text Preprocessor For Twitter-LDA')
 
     assert re.fullmatch(r'[-_0-9a-zA-Z+]+', sourcedesc)
@@ -67,7 +78,8 @@ def text_preprocessor_twlda(sourcedesc):
     input_filename = data_source_file('%s.csv' % sourcedesc)
 
     with TimeMeasure('preprocess_text'):
-        result = preprocess_csv(input_filename)
+        result = preprocess_csv(input_filename, tweet_min_length,
+                                user_min_tweets, remove_duplicates)
 
     with TimeMeasure('save_preprocessed'):
-        save_preprocessed(result, sourcedesc)
+        save_preprocessed(result)
