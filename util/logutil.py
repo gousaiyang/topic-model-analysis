@@ -1,11 +1,11 @@
 import re
 
+from .fileutil import file_read_contents
+
 
 def parse_data_from_log(logfilename, *, encoding='utf-8', regex_x=None,
                         regex_y, cast_x=str, cast_y=str):
-    with open(logfilename, 'r', encoding=encoding) as logfile:
-        content = logfile.read()
-
+    content = file_read_contents(logfilename, encoding=encoding)
     result_y = list(map(cast_y, re.findall(regex_y, content)))
     len_y = len(result_y)
 

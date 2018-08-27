@@ -14,8 +14,9 @@ from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import (NoConsoleOutput, TimeMeasure, data_source_file, log_file,
-                  model_file, report_file)
+from util import (NoConsoleOutput, TimeMeasure, data_source_file,
+                  file_read_json, file_write_json, log_file, model_file,
+                  report_file)
 
 N_WORKERS = os.cpu_count()
 
@@ -76,9 +77,8 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
         cl.info('Writing logs into file: %s' % log_filename)
 
     with TimeMeasure('load_preprocessed_text'):
-        with open(input_filename, 'r', encoding='utf-8') as infile:
-            preprocessed_texts = json.load(infile)
-            preprocessed_texts = [item[1] for item in preprocessed_texts]
+        preprocessed_texts = file_read_json(input_filename)
+        preprocessed_texts = [item[1] for item in preprocessed_texts]
 
     with TimeMeasure('gen_dict_corpus'):
         cl.progress('Generating dictionary and corpus...')
@@ -92,10 +92,7 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
         corpus = [dictionary.doc2bow(text) for text in preprocessed_texts]
 
         corpusfilename = model_file('ldacorpus-%s.json' % description)
-
-        with open(corpusfilename, 'w', encoding='utf-8') as corpusfile:
-            json.dump(corpus, corpusfile)
-
+        file_write_json(corpusfilename, corpus)
         cl.success('Corpus saved as: %s' % corpusfilename)
 
     with TimeMeasure('training'):

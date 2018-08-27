@@ -4,21 +4,17 @@ import json
 import colorlabels as cl
 from gensim.models.ldamulticore import LdaMulticore
 
-from util import (TimeMeasure, csv_reader, data_source_file, model_file, rank,
-                  report_file)
+from util import (TimeMeasure, csv_reader, data_source_file, file_read_json,
+                  model_file, rank, report_file)
 
 
 def load_all(modeldesc, sourcedesc):
     modelfilename = model_file('ldamodel-%s' % modeldesc)
     ldamodel = LdaMulticore.load(modelfilename)
 
-    corpusfilename = model_file('ldacorpus-%s.json' % modeldesc)
-    with open(corpusfilename, 'r', encoding='utf-8') as corpusfile:
-        corpus = json.load(corpusfile)
+    corpus = file_read_json(model_file('ldacorpus-%s.json' % modeldesc))
 
-    prepfilename = data_source_file(sourcedesc + '.prep.json')
-    with open(prepfilename, 'r', encoding='utf-8') as prepfile:
-        prep_items = json.load(prepfile)
+    prep_items = file_read_json(data_source_file(sourcedesc + '.prep.json'))
 
     sourcefilename = data_source_file(sourcedesc + '.csv')
     reader = csv_reader(sourcefilename)

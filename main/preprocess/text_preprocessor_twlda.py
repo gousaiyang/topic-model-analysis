@@ -2,12 +2,11 @@ import collections
 import os
 import re
 import shutil
-import string
 
 import colorlabels as cl
 
-from util import (TimeMeasure, csv_reader, data_source_file, is_bad_filename,
-                  twlda_data_file, twlda_source_file)
+from util import (TimeMeasure, csv_reader, data_source_file, file_write_lines,
+                  is_bad_filename, twlda_data_file, twlda_source_file)
 
 from .text_preprocessor import TwitterPreprocessor
 
@@ -56,15 +55,10 @@ def save_preprocessed(data):
     for user, tweets in data.items():
         output_filename = sanitize_filename(user) + '.txt'
         output_filename = os.path.join(output_dir, output_filename)
-
-        with open(output_filename, 'w', encoding='utf-8') as outfile:
-            for tweet in tweets:
-                outfile.write('%s\n' % tweet)
+        file_write_lines(output_filename, tweets)
 
     manifest_filename = twlda_data_file('filelist_test.txt')
-    with open(manifest_filename, 'w', encoding='utf-8') as manifestfile:
-        for name in os.listdir(output_dir):
-            manifestfile.write('%s\n' % name)
+    file_write_lines(manifest_filename, os.listdir(output_dir))
 
     cl.success('Preprocessed result saved in folder: %s' % output_dir)
 

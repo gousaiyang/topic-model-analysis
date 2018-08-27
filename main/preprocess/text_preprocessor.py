@@ -9,8 +9,8 @@ from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 
-from util import (TimeMeasure, csv_reader, data_source_file, name_replace_ext,
-                  remove_emails, remove_html_comments,
+from util import (TimeMeasure, csv_reader, data_source_file, file_write_json,
+                  name_replace_ext, remove_emails, remove_html_comments,
                   remove_markdown_codeblocks, remove_non_asciiprintable,
                   remove_twitter_pic_urls, remove_urls)
 
@@ -201,10 +201,7 @@ def remove_duplicate_text(data):
 
 def save_preprocessed(data, csvfilename):
     output_filename = name_replace_ext(csvfilename, '.prep.json')
-
-    with open(output_filename, 'w', encoding='utf-8') as outfile:
-        json.dump(data, outfile)
-
+    file_write_json(output_filename, data)
     cl.success('Preprocessed result saved as: %s' % output_filename)
 
 

@@ -3,7 +3,8 @@ import re
 
 import colorlabels as cl
 
-from util import (re_sub_literal, report_file, twlda_result_file,
+from util import (file_read_contents, file_read_lines, file_write_contents,
+                  re_sub_literal, report_file, twlda_result_file,
                   twlda_source_file, visual_file)
 
 
@@ -11,28 +12,25 @@ def parse_user_topic(desc, encoding='utf-8'):
     logfilename = twlda_result_file('%s/TopicsDistributionOnUsers.txt' % desc)
     user_topic = []
 
-    with open(logfilename, 'r', encoding=encoding) as logfile:
-        for line in logfile:
-            data_line = line.strip().split('\t')
+    for line in file_read_lines(logfilename, encoding=encoding):
+        data_line = line.strip().split('\t')
 
-            if not data_line:
-                continue
+        if not data_line:
+            continue
 
-            data_line[0] = data_line[0][:-4]  # Remove '.txt'
-            data_line[1:] = list(map(float, data_line[1:]))
-            user_topic.append(data_line)
+        data_line[0] = data_line[0][:-4]  # Remove '.txt'
+        data_line[1:] = list(map(float, data_line[1:]))
+        user_topic.append(data_line)
 
     return user_topic
 
 
 def parse_topic_words(desc, encoding='utf-8'):
-    logfilename = twlda_result_file('%s/WordsInTopics.txt' % desc)
     topic_words = {}
-
-    with open(logfilename, 'r', encoding=encoding) as logfile:
-        content = logfile.read()
-
+    logfilename = twlda_result_file('%s/WordsInTopics.txt' % desc)
+    content = file_read_contents(logfilename, encoding=encoding)
     result = re.findall(r'Topic (\d+):' + r'\t(\S+)\t([\d.]+)\n' * 30, content)
+
     for item in result:
         topic_words[int(item[0])] = [(word, float(prob)) for word, prob in
                                      zip(*([iter(item[1:])] * 2))]
@@ -54,10 +52,7 @@ def organize_data(desc, user_topic, topic_words, topusers=10):
 
         for item in user_topic[:topusers]:
             sourcefilename = twlda_source_file('%s/%s.txt' % (desc, item[0]))
-
-            with open(sourcefilename, 'r', encoding='utf-8') as sourcefile:
-                text = sourcefile.read()
-
+            text = file_read_contents(sourcefilename)
             topic['users'].append({'username': item[0], 'text': text})
 
         topic['weight'] = sum(item[i + 1] for item in user_topic)
@@ -76,18 +71,10 @@ def export_html(keyword, desc, data):
         'topics': data,
         'currentUser': {}
     })
-
-    templatefilename = visual_file('template.html')
-
-    with open(templatefilename, 'r', encoding='utf-8') as templatefile:
-        template = templatefile.read()
-
+    template = file_read_contents(visual_file('template.html'))
     data = re_sub_literal(r'var data =(.*)', 'var data = ' + data, template)
-
     reportfilename = report_file('ldavisual-%s-%s.html' % (keyword, desc))
-
-    with open(reportfilename, 'w', encoding='utf-8') as reportfile:
-        reportfile.write(data)
+    file_write_contents(reportfilename, data)
 
 
 def visualization_twlda(keyword, desc, encoding='utf-8'):
