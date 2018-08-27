@@ -1,11 +1,12 @@
 import json
 import re
+import time
 
 import colorlabels as cl
 
 from util import (file_read_contents, file_read_lines, file_write_contents,
-                  re_sub_literal, report_file, twlda_result_file,
-                  twlda_source_file, visual_file)
+                  open_html_in_browser, re_sub_literal, report_file,
+                  twlda_result_file, twlda_source_file, visual_file)
 
 
 def parse_user_topic(desc, encoding='utf-8'):
@@ -65,7 +66,7 @@ def organize_data(desc, user_topic, topic_words, topusers=10):
     return topics
 
 
-def export_html(keyword, desc, data):
+def export_html(keyword, desc, data, open_browser):
     data = json.dumps({
         'title': '%s - %s' % (keyword, desc),
         'topics': data,
@@ -73,14 +74,21 @@ def export_html(keyword, desc, data):
     })
     template = file_read_contents(visual_file('template.html'))
     data = re_sub_literal(r'var data =(.*)', 'var data = ' + data, template)
-    reportfilename = report_file('ldavisual-%s-%s.html' % (keyword, desc))
-    file_write_contents(reportfilename, data)
+
+    reportfile = 'ldavisual-%s-%s-%s.html' % (keyword, desc,
+                                              time.strftime('%Y%m%d%H%M%S'))
+    reportfile = report_file(reportfile)
+    file_write_contents(reportfile, data)
+    cl.success('Visualization saved as: %s' % reportfile)
+
+    if open_browser:
+        open_html_in_browser(reportfile)
 
 
-def visualization_twlda(keyword, desc, encoding='utf-8'):
+def visualization_twlda(keyword, desc, encoding='utf-8', open_browser=True):
     cl.section('Twitter-LDA Visualization')
 
     user_topic = parse_user_topic(desc, encoding=encoding)
     topic_words = parse_topic_words(desc, encoding=encoding)
     result = organize_data('test', user_topic, topic_words)
-    export_html(keyword, desc, result)
+    export_html(keyword, desc, result, open_browser)

@@ -5,3 +5,4 @@ from .logutil import *
 from .pathutil import *
 from .textutil import *
 from .timeutil import *
+from .webutil import *

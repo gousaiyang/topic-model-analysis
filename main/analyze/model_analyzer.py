@@ -1,5 +1,4 @@
 import collections
-import json
 
 import colorlabels as cl
 from gensim.models.ldamulticore import LdaMulticore

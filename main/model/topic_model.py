@@ -1,11 +1,8 @@
-import json
 import logging
 import os
 import re
 import sys
 import time
-import webbrowser
-from urllib.request import pathname2url
 
 import colorlabels as cl
 import pyLDAvis
@@ -16,13 +13,9 @@ from gensim.models.ldamulticore import LdaMulticore
 
 from util import (NoConsoleOutput, TimeMeasure, data_source_file,
                   file_read_json, file_write_json, log_file, model_file,
-                  report_file)
+                  open_html_in_browser, report_file)
 
 N_WORKERS = os.cpu_count()
-
-
-def open_html_in_browser(filename):
-    webbrowser.open('file:' + pathname2url(os.path.abspath(filename)))
 
 
 def measure_coherence(model, texts, corpus, dictionary):
@@ -49,7 +42,8 @@ def measure_coherence(model, texts, corpus, dictionary):
 def lda_topic_model(input_filename, keyword, size, *, num_topics,
                     iterations=50, passes=1, chunksize=2000, eval_every=10,
                     verbose=False, gamma_threshold=0.001, filter_no_below=5,
-                    filter_no_above=0.5, filter_keep_n=100000):
+                    filter_no_above=0.5, filter_keep_n=100000,
+                    open_browser=True):
     cl.section('LDA Topic Model Training')
     cl.info('Keyword: %s' % keyword)
     cl.info('Data size: %d' % size)
@@ -125,4 +119,5 @@ def lda_topic_model(input_filename, keyword, size, *, num_topics,
         pyLDAvis.save_html(vis, htmlfilename)
         cl.success('Visualized result saved in file: %s' % htmlfilename)
 
-    open_html_in_browser(htmlfilename)
+    if open_browser:
+        open_html_in_browser(htmlfilename)
