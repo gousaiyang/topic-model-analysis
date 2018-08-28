@@ -6,7 +6,8 @@ import shutil
 import colorlabels as cl
 
 from util import (TimeMeasure, csv_reader, data_source_file, file_write_lines,
-                  is_bad_filename, twlda_data_file, twlda_source_file)
+                  is_bad_filename, twlda_data_file, twlda_prep_file,
+                  twlda_source_file)
 
 from .text_preprocessor import TwitterPreprocessor
 
@@ -23,7 +24,7 @@ class TWLDAPreprocessor(TwitterPreprocessor):
         sanitized_text = self._text_sanitizer(text)
         tokenized_text = self._text_tokenizer(sanitized_text)
         sanitized_tokens = self._token_sanitizer(tokenized_text)
-        return ' '.join(sanitized_tokens)
+        return tuple(sanitized_tokens)
 
 
 def preprocess_csv(csvfilename, tweet_min_length, user_min_tweets,
@@ -31,6 +32,7 @@ def preprocess_csv(csvfilename, tweet_min_length, user_min_tweets,
     cl.progress('Preprocessing file: %s' % csvfilename)
     preprocessor = TWLDAPreprocessor()
     grouped_tweets = collections.defaultdict(list)
+    grouped_tweets_source = collections.defaultdict(list)
 
     for row in csv_reader(csvfilename):
         user = row['user']
@@ -40,19 +42,20 @@ def preprocess_csv(csvfilename, tweet_min_length, user_min_tweets,
             if remove_duplicates and result in grouped_tweets[user]:
                 continue
 
-            grouped_tweets[user].append(result)
+            grouped_tweets[user].append(' '.join(result))
+            grouped_tweets_source[user].append(row['text'].strip())
 
     grouped_tweets = {u: t for u, t in grouped_tweets.items()
                       if len(t) >= user_min_tweets}
-    return grouped_tweets
+    return grouped_tweets, grouped_tweets_source
 
 
-def save_preprocessed(data):
-    output_dir = twlda_source_file('test')
+def save_preprocessed(prepdata, sourcedata):
+    output_dir = twlda_prep_file('test')
     shutil.rmtree(output_dir, ignore_errors=True)
     os.mkdir(output_dir)
 
-    for user, tweets in data.items():
+    for user, tweets in prepdata.items():
         output_filename = sanitize_filename(user) + '.txt'
         output_filename = os.path.join(output_dir, output_filename)
         file_write_lines(output_filename, tweets)
@@ -61,6 +64,17 @@ def save_preprocessed(data):
     file_write_lines(manifest_filename, os.listdir(output_dir))
 
     cl.success('Preprocessed result saved in folder: %s' % output_dir)
+
+    output_dir = twlda_source_file('test')
+    shutil.rmtree(output_dir, ignore_errors=True)
+    os.mkdir(output_dir)
+
+    for user, tweets in sourcedata.items():
+        output_filename = sanitize_filename(user) + '.txt'
+        output_filename = os.path.join(output_dir, output_filename)
+        file_write_lines(output_filename, tweets)
+
+    cl.success('Grouped original tweets saved in folder: %s' % output_dir)
 
 
 def text_preprocessor_twlda(sourcedesc, *, tweet_min_length=3,
@@ -72,8 +86,9 @@ def text_preprocessor_twlda(sourcedesc, *, tweet_min_length=3,
     input_filename = data_source_file('%s.csv' % sourcedesc)
 
     with TimeMeasure('preprocess_text'):
-        result = preprocess_csv(input_filename, tweet_min_length,
-                                user_min_tweets, remove_duplicates)
+        prepdata, sourcedata = preprocess_csv(input_filename, tweet_min_length,
+                                              user_min_tweets,
+                                              remove_duplicates)
 
     with TimeMeasure('save_preprocessed'):
-        save_preprocessed(result)
+        save_preprocessed(prepdata, sourcedata)

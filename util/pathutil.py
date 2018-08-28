@@ -12,6 +12,7 @@ VISUAL_DIR = pathlib.Path(config('VISUAL_DIR'))
 TWLDA_BASE_DIR = pathlib.Path(config('TWLDA_BASE_DIR'))
 TWLDA_DATA_DIR = pathlib.Path(config('TWLDA_DATA_DIR'))
 TWLDA_SOURCE_DIR = pathlib.Path(config('TWLDA_SOURCE_DIR'))
+TWLDA_PREP_DIR = pathlib.Path(config('TWLDA_PREP_DIR'))
 TWLDA_RESULT_DIR = pathlib.Path(config('TWLDA_RESULT_DIR'))
 
 
@@ -45,6 +46,10 @@ def twlda_data_file(filename):
 
 def twlda_source_file(filename):
     return str(TWLDA_BASE_DIR / TWLDA_SOURCE_DIR / filename)
+
+
+def twlda_prep_file(filename):
+    return str(TWLDA_BASE_DIR / TWLDA_PREP_DIR / filename)
 
 
 def twlda_result_file(filename):
