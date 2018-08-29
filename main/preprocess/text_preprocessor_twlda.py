@@ -39,10 +39,12 @@ def preprocess_csv(csvfilename, tweet_min_length, user_min_tweets,
         result = preprocessor.preprocess(row['text'])
 
         if len(result) >= tweet_min_length:
+            result = ' '.join(result)
+
             if remove_duplicates and result in grouped_tweets[user]:
                 continue
 
-            grouped_tweets[user].append(' '.join(result))
+            grouped_tweets[user].append(result)
             grouped_tweets_source[user].append(row['text'].strip())
 
     grouped_tweets = {u: t for u, t in grouped_tweets.items()
