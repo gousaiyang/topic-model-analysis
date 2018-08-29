@@ -10,6 +10,7 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 
         <style>
             .container {
@@ -24,7 +25,11 @@
                 max-width: 75%;
             }
 
-            .table-sm td, .table-sm th {
+            .tooltip-inner {
+                max-width: 600px;
+            }
+
+            .table-sm td {
                 padding: 0.5rem;
             }
         </style>
@@ -53,12 +58,12 @@
                             <td>{{ topic.rank }}</td>
                             <td>{{ topic.id }}</td>
                             <td>{{ topic.weight.toFixed(2) }}</td>
-                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="topic.words.join(', ')" v-bind:data-search="topic.words.join(', ')">
+                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="showTopicWords(topic.words)" v-bind:data-search="getTopicWords(topic.words).join(' ')">
                                 <span v-for="word in topic.words.slice(0, 8)">
-                                    <span class="badge badge-info" >{{ word }}</span>&nbsp;
+                                    <span class="badge badge-info" >{{ word.word }}</span>&nbsp;
                                 </span>
                             </td>
-                            <td>
+                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="showTopicUsers(topic.users)">
                                 <span v-for="user in topic.users.slice(0, 8)">
                                     <a href="#" class="badge badge-success" data-toggle="modal" data-target="#userTweetsModal" @click="currentUser=user">
                                         {{ user.username }}
@@ -74,12 +79,42 @@
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="userTweetsModalLabel">User Tweets - {{ currentUser.username }}</h5>
+                            <h5 class="modal-title" id="userTweetsModalLabel">
+                                <i class="far fa-user fa-fw"></i> User: {{ currentUser.username }}
+                            </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body"><pre>{{ currentUser.text }}</pre></div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-3" v-if="currentUser.info.name">
+                                    <i class="far fa-id-card fa-fw"></i> <b>Name</b>: {{ currentUser.info.name }}
+                                </div>
+                                <div class="col-3" v-if="currentUser.info.followers_count">
+                                    <i class="far fa-heart fa-fw"></i> <b>Followers</b>: {{ currentUser.info.followers_count }}
+                                </div>
+                                <div class="col-3" v-if="currentUser.info.statuses_count">
+                                    <i class="far fa-comment fa-fw"></i> <b>Tweets</b>: {{ currentUser.info.statuses_count }}
+                                </div>
+                                <div class="col-3" v-if="currentUser.info.verified">
+                                    <i class="fas fa-user-check fa-fw"></i> <b>Verified</b>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3" v-if="currentUser.info.lang">
+                                    <i class="fas fa-language fa-fw"></i> <b>Language</b>: {{ currentUser.info.lang }}
+                                </div>
+                                <div class="col-3" v-if="currentUser.info.location">
+                                    <i class="fas fa-map-marker-alt fa-fw"></i> <b>Location</b>: {{ currentUser.info.location }}
+                                </div>
+                                <div class="col-6" v-if="currentUser.info.created_at">
+                                    <i class="far fa-calendar-alt fa-fw"></i> <b>Created</b>: {{ currentUser.info.created_at }}
+                                </div>
+                            </div>
+                            <hr>
+                            <pre>{{ currentUser.text }}</pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,10 +129,22 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <script>
-        var data = {title: 'Template', topics: [], currentUser: {}}; // To be generated.
+        var data = {title: 'Template', topics: [], currentUser: {info: {}}}; // To be generated.
     </script>
 
     <script>
+        function getTopicWords(words) {
+            return words.map(w => w.word);
+        }
+
+        function showTopicWords(words) {
+            return words.map(w => (w.word + ': ' + (w.prob * 100).toFixed(1) + '%')).join(', ');
+        }
+
+        function showTopicUsers(users) {
+            return users.map(u => (u.username + ': ' + u.weight.toFixed(3))).join(', ');
+        }
+
         $(function () {
             var app = new Vue({
                 el: '#app',
