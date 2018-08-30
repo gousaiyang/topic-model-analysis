@@ -60,26 +60,60 @@
                             <td>{{ topic.weight.toFixed(2) }}</td>
                             <td data-toggle="tooltip" data-placement="bottom" v-bind:title="showTopicWords(topic.words)" v-bind:data-search="getTopicWords(topic.words).join(' ')">
                                 <span v-for="word in topic.words.slice(0, 8)">
-                                    <span class="badge badge-info" >{{ word.word }}</span>&nbsp;
+                                    <a href="#" class="badge badge-primary" data-toggle="modal" data-target="#wordModal" @click="currentWord=word">
+                                        {{ word.word }}
+                                    </a>&nbsp;
+                                </span>
+                                <span v-if="topic.showAllWords" v-for="word in topic.words.slice(8)">
+                                    <a href="#" class="badge badge-primary" data-toggle="modal" data-target="#wordModal" @click="currentWord=word">
+                                        {{ word.word }}
+                                    </a>&nbsp;
+                                </span>
+                                <span class="badge badge-primary" @click="topic.showAllWords=!topic.showAllWords">
+                                    <i class="fas fa-ellipsis-h"></i>
                                 </span>
                             </td>
-                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="showTopicUsers(topic.users)">
+                            <td data-toggle="tooltip" data-placement="bottom" v-bind:title="showTopicUsers(topic.users)" v-bind:data-search="getTopicUsers(topic.users).join(' ')">
                                 <span v-for="user in topic.users.slice(0, 8)">
-                                    <a href="#" class="badge badge-success" data-toggle="modal" data-target="#userTweetsModal" @click="currentUser=user">
+                                    <a href="#" class="badge badge-success" data-toggle="modal" data-target="#userModal" @click="currentUser=user">
                                         {{ user.username }}
                                     </a>
                                     &nbsp;
+                                </span>
+                                <span v-if="topic.showAllUsers" v-for="user in topic.users.slice(8)">
+                                    <a href="#" class="badge badge-success" data-toggle="modal" data-target="#userModal" @click="currentUser=user">
+                                        {{ user.username }}
+                                    </a>
+                                    &nbsp;
+                                </span>
+                                <span class="badge badge-success" @click="topic.showAllUsers=!topic.showAllUsers">
+                                    <i class="fas fa-ellipsis-h"></i>
                                 </span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="modal fade" id="userTweetsModal" tabindex="-1" role="dialog" aria-labelledby="userTweetsModalLabel" aria-hidden="true">
+            <div class="modal fade" id="wordModal" tabindex="-1" role="dialog" aria-labelledby="wordModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="userTweetsModalLabel">
+                            <h5 class="modal-title" id="wordModalLabel">
+                                <i class="far fa-comment fa-fw"></i> Tweets regarding <b>{{ currentWord.word }}</b> in this topic
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body"><pre>{{ currentWord.text }}</pre></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userModalLabel">
                                 <i class="far fa-user fa-fw"></i> User: {{ currentUser.username }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -129,8 +163,10 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <script>
-        var data = {title: 'Template', topics: [], currentUser: {info: {}}}; // To be generated.
+        var data = {title: 'Template', topics: [], currentWord: {}, currentUser: {info: {}}}; // To be generated.
     </script>
+
+    <script src="data.js"></script> <!-- If exist, will override the inline data above. -->
 
     <script>
         function getTopicWords(words) {
@@ -139,6 +175,10 @@
 
         function showTopicWords(words) {
             return words.map(w => (w.word + ': ' + (w.prob * 100).toFixed(1) + '%')).join(', ');
+        }
+
+        function getTopicUsers(users) {
+            return users.map(u => u.username);
         }
 
         function showTopicUsers(users) {

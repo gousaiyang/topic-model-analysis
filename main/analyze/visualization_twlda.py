@@ -61,6 +61,7 @@ def show_topic_words(topic_words, topic_id):
     return [{
         'word': w,
         'prob': p / sum_prob,
+        'text': ''
     } for w, p in topic_words[topic_id]]
 
 
@@ -70,7 +71,9 @@ def organize_data(desc, user_topic, topic_words, user_info, topusers=10):
     topics = [{
         'id': i,
         'words': show_topic_words(topic_words, i),
-        'users': []
+        'users': [],
+        'showAllWords': False,
+        'showAllUsers': False,
     } for i in range(num_topics)]
 
     for i, topic in enumerate(topics):
@@ -86,6 +89,11 @@ def organize_data(desc, user_topic, topic_words, user_info, topusers=10):
                             'text': text
                         })
 
+            for line in text.split('\n'):
+                for word in topic['words']:
+                    if word['word'].lower() in line.lower():
+                        word['text'] += line + '\n'
+
         topic['weight'] = sum(item[i + 1] for item in user_topic)
 
     topics = sorted(topics, key=lambda x: x['weight'], reverse=True)
@@ -96,31 +104,38 @@ def organize_data(desc, user_topic, topic_words, user_info, topusers=10):
     return topics
 
 
-def export_html(keyword, desc, data, open_browser):
+def export_html(keyword, desc, data, portable, open_browser):
     data = json.dumps({
         'title': '%s - %s' % (keyword, desc),
         'topics': data,
+        'currentWord': {},
         'currentUser': {'info': {}}
     })
-    template = file_read_contents(visual_file('template.html'))
-    data = re_sub_literal(r'var data =(.*)', 'var data = ' + data, template)
 
-    reportfile = 'ldavisual-%s-%s-%s.html' % (keyword, desc,
-                                              time.strftime('%Y%m%d%H%M%S'))
-    reportfile = report_file(reportfile)
-    file_write_contents(reportfile, data)
-    cl.success('Visualization saved as: %s' % reportfile)
+    if portable:
+        template = file_read_contents(visual_file('template.html'))
+        data = re_sub_literal(r'var data =(.*)', 'var data = ' + data,
+                              template)
 
-    if open_browser:
-        open_html_in_browser(reportfile)
+        reportfile = 'ldavisual-%s-%s-%s.html' \
+            % (keyword, desc, time.strftime('%Y%m%d%H%M%S'))
+        reportfile = report_file(reportfile)
+        file_write_contents(reportfile, data)
+        cl.success('Visualization saved as: %s' % reportfile)
+
+        if open_browser:
+            open_html_in_browser(reportfile)
+    else:
+        file_write_contents(report_file('data.js'), 'var data = ' + data)
+        cl.success('Visualization data saved as: data.js')
 
 
 def visualization_twlda(keyword, desc, userinfofile, encoding='utf-8',
-                        open_browser=True):
+                        portable=True, open_browser=True):
     cl.section('Twitter-LDA Visualization')
 
     user_topic = parse_user_topic(desc, encoding=encoding)
     topic_words = parse_topic_words(desc, encoding=encoding)
     user_info = load_user_info(data_source_file(userinfofile))
     result = organize_data('test', user_topic, topic_words, user_info)
-    export_html(keyword, desc, result, open_browser)
+    export_html(keyword, desc, result, portable, open_browser)
