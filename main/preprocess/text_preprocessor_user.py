@@ -18,7 +18,7 @@ def preprocess_csv(csvfilename):
     for user in grouped_tweets:
         yield {
             'id': user,
-            'text': ' '.join(grouped_tweets[user])
+            'text': '  '.join(grouped_tweets[user])
         }
 
 

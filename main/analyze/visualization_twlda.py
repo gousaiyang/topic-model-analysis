@@ -65,7 +65,7 @@ def show_topic_words(topic_words, topic_id):
     } for w, p in topic_words[topic_id]]
 
 
-def organize_data(desc, user_topic, topic_words, user_info, topusers=10):
+def organize_data(desc, user_topic, topic_words, user_info, topusers):
     num_topics = len(topic_words)
 
     topics = [{
@@ -126,16 +126,17 @@ def export_html(keyword, desc, data, portable, open_browser):
         if open_browser:
             open_html_in_browser(reportfile)
     else:
-        file_write_contents(report_file('data.js'), 'var data = ' + data)
+        file_write_contents(visual_file('data.js'), 'var data = ' + data)
         cl.success('Visualization data saved as: data.js')
 
 
-def visualization_twlda(keyword, desc, userinfofile, encoding='utf-8',
-                        portable=True, open_browser=True):
+def visualization_twlda(keyword, desc, userinfofile, topusers=10,
+                        encoding='utf-8', portable=True, open_browser=True):
     cl.section('Twitter-LDA Visualization')
 
     user_topic = parse_user_topic(desc, encoding=encoding)
     topic_words = parse_topic_words(desc, encoding=encoding)
     user_info = load_user_info(data_source_file(userinfofile))
-    result = organize_data('test', user_topic, topic_words, user_info)
+    result = organize_data('test', user_topic, topic_words, user_info,
+                           topusers)
     export_html(keyword, desc, result, portable, open_browser)
