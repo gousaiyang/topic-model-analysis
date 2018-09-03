@@ -99,13 +99,17 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="wordModalLabel">
-                                <i class="far fa-comment fa-fw"></i> Tweets regarding "{{ currentWord.word }}" in this topic ({{ lineCount(currentWord.text) }} records)
+                                <i class="far fa-comment fa-fw"></i> Tweets regarding "{{ currentWord.word }}" in this topic ({{ currentWord.text.length }} records)
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body"><pre>{{ currentWord.text }}</pre></div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                <li class="list-group-item" v-for="line in currentWord.text">{{ line }}</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +118,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="userModalLabel">
-                                <i class="far fa-user fa-fw"></i> User: {{ currentUser.username }} ({{ lineCount(currentUser.text) }} records)
+                                <i class="far fa-user fa-fw"></i> User: {{ currentUser.username }} ({{ currentUser.text.length }} records)
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -147,7 +151,9 @@
                                 </div>
                             </div>
                             <hr>
-                            <pre>{{ currentUser.text }}</pre>
+                            <ul class="list-group">
+                                <li class="list-group-item" v-for="line in currentUser.text">{{ line }}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -163,7 +169,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <script>
-        var data = {title: 'Template', topics: [], currentWord: {}, currentUser: {info: {}}}; // To be generated.
+        var data = {title: 'Template', topics: [], currentWord: {text: []}, currentUser: {info: {}, text: []}}; // To be generated.
     </script>
 
     <script src="data.js"></script> <!-- If exist, will override the inline data above. -->
@@ -183,10 +189,6 @@
 
         function showTopicUsers(users) {
             return users.map(u => (u.username + ': ' + u.weight.toFixed(3))).join(', ');
-        }
-
-        function lineCount(text) {
-            return text ? (text.split('\n').length - 1) : 0;
         }
 
         $(function () {

@@ -61,7 +61,7 @@ def show_topic_words(topic_words, topic_id):
     return [{
         'word': w,
         'prob': p / sum_prob,
-        'text': ''
+        'text': []
     } for w, p in topic_words[topic_id]]
 
 
@@ -86,13 +86,13 @@ def organize_data(desc, user_topic, topic_words, user_info, topusers):
                             'username': item[0],
                             'weight': item[i + 1],
                             'info': user_info.get(item[0]) or {},
-                            'text': text
+                            'text': [t for t in text.split('\n') if t]
                         })
 
             for line in text.split('\n'):
                 for word in topic['words']:
                     if word['word'].lower() in line.lower():
-                        word['text'] += line + '\n'
+                        word['text'].append(line)
 
         topic['weight'] = sum(item[i + 1] for item in user_topic)
 
@@ -108,8 +108,8 @@ def export_html(keyword, desc, data, portable, open_browser):
     data = json.dumps({
         'title': '%s - %s' % (keyword, desc),
         'topics': data,
-        'currentWord': {},
-        'currentUser': {'info': {}}
+        'currentWord': {'text': []},
+        'currentUser': {'info': {}, 'text': []}
     })
 
     if portable:
