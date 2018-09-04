@@ -106,7 +106,8 @@ def organize_data(desc, user_topic, topic_words, user_info, topusers):
 
 def export_html(keyword, desc, data, portable, open_browser):
     data = json.dumps({
-        'title': '%s - %s' % (keyword, desc),
+        'keyword': keyword,
+        'description': desc,
         'topics': data,
         'currentWord': {'text': []},
         'currentUser': {'info': {}, 'text': []}
@@ -114,13 +115,13 @@ def export_html(keyword, desc, data, portable, open_browser):
 
     if portable:
         template = file_read_contents(visual_file('template.html'))
-        data = re_sub_literal(r'var data =(.*)', 'var data = ' + data,
-                              template)
+        html = re.sub(r'<script src="data.js">(.*)', '', template)
+        html = re_sub_literal(r'var data =(.*)', 'var data = ' + data, html)
 
         reportfile = 'ldavisual-%s-%s-%s.html' \
             % (keyword, desc, time.strftime('%Y%m%d%H%M%S'))
         reportfile = report_file(reportfile)
-        file_write_contents(reportfile, data)
+        file_write_contents(reportfile, html)
         cl.success('Visualization saved as: %s' % reportfile)
 
         if open_browser:

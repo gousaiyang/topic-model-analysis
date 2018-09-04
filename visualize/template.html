@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="renderer" content="webkit">
 
-        <title>Topic Distribution</title>
+        <title>Twitter Topic Distribution Table</title>
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
@@ -17,40 +17,55 @@
                 max-width: 85%;
             }
 
-            nav > .container {
-                padding: 0;
+            .navbar {
+                color: #fff;
+                background-color: #1da1f2;
             }
 
-            .modal-lg {
-                max-width: 75%;
+            .navbar-text {
+                font-size: 1.1rem;
+            }
+
+            #mainContainer {
+                margin-top: 70px;
+                margin-bottom: 20px;
+            }
+
+            .table-sm td {
+                padding: 0.5rem;
             }
 
             .tooltip-inner {
                 max-width: 600px;
             }
 
-            .table-sm td {
-                padding: 0.5rem;
+            .modal-lg {
+                max-width: 75%;
+            }
+
+            mark {
+                background: #ffc107;
             }
         </style>
     </head>
 
     <body>
         <div id="app">
-            <nav class="navbar navbar-light" style="background-color: #59f;">
-                <div class="container">
-                    <span class="navbar-brand mb-0 h1">Topic Distribution - {{ title }}</span>
+            <nav class="navbar fixed-top">
+                <div class="container p-0">
+                    <span class="navbar-brand mb-0 h1">Twitter Topic Distribution Table</span>
+                    <span class="navbar-text">Keyword: {{ keyword }}&emsp;Description: {{ description }}</span>
                 </div>
             </nav>
-            <div class="container" style="margin-top: 15px;">
+            <div id="mainContainer" class="container">
                 <table id="topicTable" class="table table-sm table-hover" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>ID</th>
-                            <th>Weight</th>
+                            <th data-searchable="false">Rank</th>
+                            <th data-searchable="false">ID</th>
+                            <th data-searchable="false">Weight</th>
                             <th>Top Words</th>
-                            <th>Top Users</th>
+                            <th data-orderable="false">Top Users</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -105,7 +120,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body">
+                        <div id="wordModalText" class="modal-body">
                             <ul class="list-group">
                                 <li class="list-group-item" v-for="line in currentWord.text">{{ line }}</li>
                             </ul>
@@ -167,9 +182,10 @@
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
     <script>
-        var data = {title: 'Template', topics: [], currentWord: {text: []}, currentUser: {info: {}, text: []}}; // To be generated.
+        var data = {keyword: '', description: '', topics: [], currentWord: {text: []}, currentUser: {info: {}, text: []}}; // To be generated.
     </script>
 
     <script src="data.js"></script> <!-- If exist, will override the inline data above. -->
@@ -191,14 +207,33 @@
             return users.map(u => (u.username + ': ' + u.weight.toFixed(3))).join(', ');
         }
 
+        function markWord(word) {
+            $('#wordModalText').unmark({
+                done: function () {
+                    $('#wordModalText').mark(word);
+                }
+            });
+        }
+
         $(function () {
             var app = new Vue({
                 el: '#app',
-                data: data
+                data: data,
+                updated: function () {
+                    markWord(this.currentWord.word);
+                }
             });
 
             $('[data-toggle="tooltip"]').tooltip();
-            $('#topicTable').DataTable();
+            $('#topicTable').DataTable({
+                'language': {
+                    'info': 'Showing _START_ to _END_ of _TOTAL_ topics',
+                    'infoEmpty': 'Showing 0 to 0 of 0 topics',
+                    'infoFiltered': '(filtered from _MAX_ total topics)',
+                    'lengthMenu': 'Show _MENU_ topics',
+                    'search': 'Search words and users:'
+                }
+            });
         });
     </script>
 </html>
