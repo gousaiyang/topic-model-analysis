@@ -111,7 +111,7 @@ def export_html(keyword, desc, data, portable, open_browser):
         'topics': data,
         'currentWord': {'text': []},
         'currentUser': {'info': {}, 'text': []}
-    })
+    }, separators=(',', ':'))
 
     if portable:
         template = file_read_contents(visual_file('template.html'))
