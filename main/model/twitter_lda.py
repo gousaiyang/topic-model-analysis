@@ -5,10 +5,12 @@ import subprocess
 import colorlabels as cl
 from decouple import config
 
-from util import (TWLDA_BASE_DIR, TimeMeasure, escape_param, tee_command,
-                  twlda_base_file, twlda_data_file, twlda_result_file)
+from util import (TWLDA_BASE_DIR, TimeMeasure, escape_param, is_windows,
+                  tee_command, twlda_base_file, twlda_data_file,
+                  twlda_result_file)
 
-CLASSPATH = ';'.join(map(twlda_base_file, ['bin', 'lib/args4j-2.0.6.jar',
+SEP = ';' if is_windows else ':'
+CLASSPATH = SEP.join(map(twlda_base_file, ['bin', 'lib/args4j-2.0.6.jar',
                                                   'lib/jargs.jar',
                                                   'lib/TwitterTokenizer.jar']))
 COMMAND = 'java -cp %s TwitterLDA.TwitterLDAmain' % escape_param(CLASSPATH)
