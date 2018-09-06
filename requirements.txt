@@ -9,3 +9,6 @@ python-decouple
 pygithub
 matplotlib
 stackapi
+flask
+peewee
+bcrypt

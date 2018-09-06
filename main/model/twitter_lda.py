@@ -3,7 +3,6 @@ import re
 import subprocess
 
 import colorlabels as cl
-from decouple import config
 
 from util import (TWLDA_BASE_DIR, TimeMeasure, escape_param, is_windows,
                   tee_command, twlda_base_file, twlda_data_file,

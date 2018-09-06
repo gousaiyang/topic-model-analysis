@@ -4,3 +4,7 @@ __pycache__
 /_archive
 .env
 /*.py
+!app.py
+!initdb.py
+!register.py
+*.db
