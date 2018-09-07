@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+import uuid
 
 from decouple import config
 
@@ -81,3 +82,7 @@ def is_bad_filename(filename):
         return True
 
     return False
+
+
+def random_filename():
+    return uuid.uuid4().hex

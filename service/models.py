@@ -1,8 +1,8 @@
 import datetime
 
 from decouple import config
-from peewee import (CharField, DateTimeField, ForeignKeyField, Model,
-                    SqliteDatabase)
+from peewee import (BigIntegerField, CharField, DateTimeField, ForeignKeyField,
+                    Model, SqliteDatabase)
 
 db = SqliteDatabase(config('DB_FILENAME'))
 
@@ -20,10 +20,11 @@ class User(BaseModel):
 
 
 class File(BaseModel):
-    type = CharField()
+    file_type = CharField()
     owner = ForeignKeyField(User, backref='files')
     original_name = CharField()
     physical_name = CharField()
+    size = BigIntegerField()
 
 
 class Task(BaseModel):
