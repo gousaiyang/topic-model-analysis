@@ -9,15 +9,15 @@ def open_html_in_browser(filename):
     webbrowser.open('file:' + pathname2url(os.path.abspath(filename)))
 
 
-def success_response(message=None, status_code=200):
-    if message is None:
+def success_response(data=None, status_code=200):
+    if data is None:
         return '', status_code
     else:
-        return make_response(jsonify(message), status_code)
+        return make_response(jsonify({'data': data}), status_code)
 
 
 def failure_response(message=None, status_code=400):
     if message is None:
         return '', status_code
     else:
-        return make_response(jsonify(message), status_code)
+        return make_response(jsonify({'message': message}), status_code)

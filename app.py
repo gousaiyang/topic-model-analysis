@@ -1,6 +1,8 @@
 import functools
 import os
+from datetime import timedelta
 
+import colorlabels as cl
 from decouple import config
 from flask import Flask, g, request, send_file, session
 
@@ -16,6 +18,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 app = Flask(__name__)
 app.secret_key = config('FLASK_SECRET')
 app.config['MAX_CONTENT_LENGTH'] = config('MAX_UPLOAD_SIZE', cast=int)
+cl.config(color_span=0)
+SESSION_EXPIRE_TIME = config('SESSION_EXPIRE_TIME', cast=int)
 
 
 def get_current_user():
@@ -36,6 +40,9 @@ def login_required(func):
 
 @app.before_request
 def before_request():
+    session.permanent = True
+    session.modified = True
+    app.permanent_session_lifetime = timedelta(seconds=SESSION_EXPIRE_TIME)
     g.db = db
     g.db.connect()
 
