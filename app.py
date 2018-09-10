@@ -121,7 +121,11 @@ def download_file(file_id):
     if f.owner != user:
         return failure_response('Access denied.', 403)
 
-    return send_file(data_source_file(f.physical_name), as_attachment=True,
+    physical_path = data_source_file(f.physical_name)
+    if not os.path.isfile(physical_path):
+        return failure_response('File is missing on server.', 500)
+
+    return send_file(physical_path, as_attachment=True,
                      attachment_filename=f.original_name)
 
 
