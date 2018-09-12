@@ -5,7 +5,8 @@ import colorlabels as cl
 
 from scraper import (github_issue_org_fetch, soapi_search, twapi_search,
                      twscrape_search)
-from util import data_source_file, export_csv, name_with_title_suffix
+from util import (data_source_file, export_csv, get_exc_line,
+                  name_with_title_suffix)
 
 
 def iterator_aggregate_list(data):
@@ -14,8 +15,9 @@ def iterator_aggregate_list(data):
 
         try:
             result.extend(data)
-        except Exception as e:
-            cl.warning('Exception happened while collecting data: %s' % e)
+        except Exception:
+            cl.warning('Exception happened while collecting data: %s'
+                       % get_exc_line())
         except KeyboardInterrupt:
             cl.warning('User hit Ctrl-C. Will not collect more data.')
 

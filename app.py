@@ -1,4 +1,5 @@
 import functools
+import multiprocessing
 import os
 from datetime import timedelta
 
@@ -10,8 +11,11 @@ from service.auth import check_credentials, get_id_by_username
 from service.file import (get_file_by_id, get_file_info, remove_file,
                           upload_source_file)
 from service.models import User, db
+from service.task import (create_training_task, get_running_task,
+                          get_task_by_id, get_task_info)
 from util import (data_source_file, failure_response, is_bad_filename,
-                  success_response, validate_not_empty)
+                  success_response, validate_not_empty,
+                  validate_positive_integer, validate_safe_name)
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -68,11 +72,8 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    r = validate_not_empty(username, 'username')
-    if not r:
-        return failure_response(str(r))
-
-    r = validate_not_empty(password, 'password')
+    r = validate_not_empty(username, 'username') and \
+        validate_not_empty(password, 'password')
     if not r:
         return failure_response(str(r))
 
@@ -104,7 +105,7 @@ def get_file(file_id):
     f = get_file_by_id(file_id)
     if not f:
         return failure_response('File does not exist.', 404)
-    if f.owner != user:
+    if f.owner.id != user.id:
         return failure_response('Access denied.', 403)
 
     return success_response(get_file_info(f))
@@ -118,7 +119,7 @@ def download_file(file_id):
     f = get_file_by_id(file_id)
     if not f:
         return failure_response('File does not exist.', 404)
-    if f.owner != user:
+    if f.owner.id != user.id:
         return failure_response('Access denied.', 403)
 
     physical_path = data_source_file(f.physical_name)
@@ -160,8 +161,121 @@ def delete_file(file_id):
     f = get_file_by_id(file_id)
     if not f:
         return failure_response('File does not exist.', 404)
-    if f.owner != user:
+    if f.owner.id != user.id:
         return failure_response('Access denied.', 403)
 
     remove_file(f)
     return success_response(status_code=204)
+
+
+@app.route('/api/tasks', methods=['GET'])
+@login_required
+def list_all_tasks():
+    user = get_current_user()
+    return success_response([get_task_info(t) for t in user.tasks])
+
+
+@app.route('/api/tasks/<int:task_id>', methods=['GET'])
+@login_required
+def get_task(task_id):
+    user = get_current_user()
+
+    task = get_task_by_id(task_id)
+    if not task:
+        return failure_response('Task does not exist.', 404)
+    if task.owner.id != user.id:
+        return failure_response('Access denied.', 403)
+
+    return success_response(get_task_info(task))
+
+
+@app.route('/api/tasks/running', methods=['GET'])
+@login_required
+def check_running_task():
+    user = get_current_user()
+
+    task = get_running_task()
+    if task:
+        if task.owner.id == user.id:
+            response = {'running': True, 'task': get_task_info(task)}
+        else:
+            response = {'running': True}
+    else:
+        response = {'running': False}
+
+    return success_response(response)
+
+
+@app.route('/api/tasks', methods=['POST'])
+@login_required
+def add_task():
+    user = get_current_user()
+
+    tweets_file = request.form.get('tweets_file')
+    userinfo_file = request.form.get('userinfo_file')
+    tag = request.form.get('tag')
+    min_topics = request.form.get('min_topics')
+    max_topics = request.form.get('max_topics')
+    iterations = request.form.get('iterations')
+    keyword = request.form.get('keyword')
+
+    r = validate_not_empty(tweets_file, 'tweets_file') and \
+        validate_positive_integer(tweets_file, 'tweets_file') and \
+        validate_not_empty(userinfo_file, 'userinfo_file') and \
+        validate_positive_integer(userinfo_file, 'userinfo_file') and \
+        validate_not_empty(tag, 'tag') and \
+        validate_safe_name(tag, 'tag') and \
+        validate_not_empty(min_topics, 'min_topics') and \
+        validate_positive_integer(min_topics, 'min_topics') and \
+        validate_not_empty(max_topics, 'max_topics') and \
+        validate_positive_integer(max_topics, 'max_topics') and \
+        validate_not_empty(iterations, 'iterations') and \
+        validate_positive_integer(iterations, 'iterations') and \
+        validate_not_empty(keyword, 'keyword')
+    if not r:
+        return failure_response(str(r))
+
+    tweets_file = int(tweets_file)
+    userinfo_file = int(userinfo_file)
+    min_topics = int(min_topics)
+    max_topics = int(max_topics)
+    iterations = int(iterations)
+
+    tweets_file = get_file_by_id(tweets_file)
+    if not tweets_file:
+        return failure_response('tweets_file does not exist.', 404)
+    if tweets_file.owner.id != user.id:
+        return failure_response('tweets_file access denied.', 403)
+    if tweets_file.file_type != 'source':
+        return failure_response('tweets_file is not a source file')
+
+    userinfo_file = get_file_by_id(userinfo_file)
+    if not userinfo_file:
+        return failure_response('userinfo_file does not exist.', 404)
+    if userinfo_file.owner.id != user.id:
+        return failure_response('userinfo_file access denied.', 403)
+    if userinfo_file.file_type != 'source':
+        return failure_response('userinfo_file is not a source file')
+
+    if min_topics < 3 or max_topics < 3:
+        return failure_response('the number of topics should be at least 3')
+
+    if min_topics > max_topics:
+        return failure_response('require min_topics <= max_topics')
+
+    params = {
+        'min_topics': min_topics,
+        'max_topics': max_topics,
+        'iterations': iterations,
+        'keyword': keyword
+    }
+
+    with multiprocessing.Lock():
+        if get_running_task():
+            return failure_response('A task is already running on the server.')
+
+        r = create_training_task(user, tweets_file, userinfo_file, tag, params)
+        if r:
+            return success_response(r, 201)
+        else:
+            return failure_response('A task with the same tag already exists.')

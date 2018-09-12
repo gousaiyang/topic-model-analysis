@@ -29,6 +29,21 @@ def validate_not_empty(value, field):
         return ValidationResult('%s should not be empty' % field)
 
 
+def validate_positive_integer(value, field):
+    if re.fullmatch(r'[0-9]+', value):
+        return ValidationResult()
+    else:
+        return ValidationResult('%s should be a positive integer' % field)
+
+
+def validate_safe_name(value, field):
+    if re.fullmatch(r'[-_0-9a-zA-Z]+', value):
+        return ValidationResult()
+    else:
+        return ValidationResult('%s should only contain letters, digits, '
+                                'underscores and hyphens.' % field)
+
+
 def validate_username(username):
     if re.fullmatch(r'[-_0-9a-zA-Z]{5,20}', username):
         return ValidationResult()

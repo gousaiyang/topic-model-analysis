@@ -5,7 +5,7 @@ from .models import User, db
 
 def register(username, password):
     with db.atomic():
-        if User.select().where(User.username == username):
+        if User.get_or_none(User.username == username):
             return False
 
         password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
@@ -14,11 +14,11 @@ def register(username, password):
 
 
 def check_credentials(username, password):
-    result = User.select().where(User.username == username)
+    result = User.get_or_none(User.username == username)
     return result and bcrypt.checkpw(password.encode(),
-                                     result[0].password.encode())
+                                     result.password.encode())
 
 
 def get_id_by_username(username):
-    result = User.select().where(User.username == username)
-    return result[0].id if result else None
+    result = User.get_or_none(User.username == username)
+    return result.id if result else None

@@ -1,8 +1,8 @@
 import colorlabels as cl
 
 from scraper import twapi
-from util import (csv_reader, data_source_file, export_csv, merge_whitespaces,
-                  name_with_title_suffix)
+from util import (csv_reader, data_source_file, export_csv, get_exc_line,
+                  merge_whitespaces, name_with_title_suffix)
 
 
 def recover_from_csv(csvfilename):
@@ -19,8 +19,8 @@ def recover_from_csv(csvfilename):
         if int(row['retweets']):
             try:
                 retweets = twapi.GetRetweets(int(row['id']), count=100)
-            except Exception as e:
-                cl.warning('Error: %s' % e)
+            except Exception:
+                cl.warning('Error: %s' % get_exc_line())
             else:
                 for tweet in retweets:
                     yield {

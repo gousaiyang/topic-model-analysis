@@ -17,8 +17,7 @@ def alloc_filename(user, ext, path_func):
 
 
 def get_file_by_id(file_id):
-    result = File.select().where(File.id == file_id)
-    return result[0] if result else None
+    return File.get_or_none(File.id == file_id)
 
 
 def get_file_info(f):
@@ -34,7 +33,7 @@ def get_file_info(f):
 def upload_source_file(f, user):
     with db.atomic():
         if File.select().where((File.owner == user) &
-                            (File.original_name == f.filename)):
+                               (File.original_name == f.filename)):
             return False
 
         new_filename, new_filepath = alloc_filename(user, '.csv',

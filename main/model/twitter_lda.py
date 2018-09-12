@@ -5,8 +5,8 @@ import subprocess
 import colorlabels as cl
 
 from util import (TWLDA_BASE_DIR, TimeMeasure, escape_param, is_windows,
-                  tee_command, twlda_base_file, twlda_data_file,
-                  twlda_result_file)
+                  redirect_command, tee_command, twlda_base_file,
+                  twlda_data_file, twlda_result_file)
 
 SEP = ';' if is_windows else ':'
 CLASSPATH = SEP.join(map(twlda_base_file, ['bin', 'lib/args4j-2.0.6.jar',
@@ -28,8 +28,9 @@ def set_parameters(topics, alpha_g, beta_word, beta_b, gamma, iteration):
         pf.write('iteration: %d\n' % iteration)
 
 
-def run_twlda():
-    subprocess.call(tee_command(COMMAND, LOGFILE), cwd=str(TWLDA_BASE_DIR))
+def run_twlda(show_console_output):
+    command_wrapper = tee_command if show_console_output else redirect_command
+    subprocess.call(command_wrapper(COMMAND, LOGFILE), cwd=str(TWLDA_BASE_DIR))
 
 
 def move_result(output_desc):
@@ -39,7 +40,8 @@ def move_result(output_desc):
 
 
 def twitter_lda(*, output_desc, topics, iteration, alpha_g=None,
-                beta_word=0.01, beta_b=0.01, gamma=20):
+                beta_word=0.01, beta_b=0.01, gamma=20,
+                show_console_output=True):
     cl.section('Twitter-LDA Runner')
     cl.info('Output description: %s' % output_desc)
 
@@ -51,6 +53,6 @@ def twitter_lda(*, output_desc, topics, iteration, alpha_g=None,
     set_parameters(topics, alpha_g, beta_word, beta_b, gamma, iteration)
 
     with TimeMeasure('Twitter-LDA training'):
-        run_twlda()
+        run_twlda(show_console_output=show_console_output)
 
     move_result(output_desc)

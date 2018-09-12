@@ -7,6 +7,7 @@ stdout_backup = None
 stderr_backup = None
 devnull = None
 is_windows = platform.system() == 'Windows'
+pipe_encoding = 'utf-16-le' if is_windows else 'utf-8'
 
 
 def disable_console_output():
@@ -64,3 +65,7 @@ def exec_shell(s):
 
 def tee_command(command, filename):
     return exec_shell(command + ' 2>&1 | tee ' + escape_param(filename))
+
+
+def redirect_command(command, filename):
+    return exec_shell(command + ' 2>&1 > ' + escape_param(filename))

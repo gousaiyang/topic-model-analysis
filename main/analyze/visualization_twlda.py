@@ -118,20 +118,23 @@ def export_html(keyword, desc, data, portable, open_browser):
         html = re.sub(r'<script src="data.js">(.*)', '', template)
         html = re_sub_literal(r'var data =(.*)', 'var data = ' + data, html)
 
-        reportfile = 'ldavisual-%s-%s-%s.html' \
-            % (keyword, desc, time.strftime('%Y%m%d%H%M%S'))
-        reportfile = report_file(reportfile)
+        reportfilename = 'ldavisual-%s-%s.html' \
+            % (desc, time.strftime('%Y%m%d%H%M%S'))
+        reportfile = report_file(reportfilename)
         file_write_contents(reportfile, html)
-        cl.success('Visualization saved as: %s' % reportfile)
+        cl.success('Visualization saved as: %s' % reportfilename)
 
         if open_browser:
             open_html_in_browser(reportfile)
+
+        return reportfilename
     else:
         file_write_contents(visual_file('data.js'), 'var data = ' + data)
         cl.success('Visualization data saved as: data.js')
+        return None
 
 
-def visualization_twlda(keyword, desc, userinfofile, topusers=10,
+def visualization_twlda(keyword, desc, desc_show, userinfofile, topusers=20,
                         encoding='utf-8', portable=True, open_browser=True):
     cl.section('Twitter-LDA Visualization')
 
@@ -140,4 +143,4 @@ def visualization_twlda(keyword, desc, userinfofile, topusers=10,
     user_info = load_user_info(data_source_file(userinfofile))
     result = organize_data('test', user_topic, topic_words, user_info,
                            topusers)
-    export_html(keyword, desc, result, portable, open_browser)
+    return export_html(keyword, desc_show, result, portable, open_browser)
