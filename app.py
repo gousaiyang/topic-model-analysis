@@ -8,14 +8,14 @@ from decouple import config
 from flask import Flask, g, request, send_file, session
 
 from service.auth import check_credentials, get_id_by_username
-from service.file import (get_file_by_id, get_file_info, remove_file,
-                          upload_source_file)
+from service.file import (get_file_by_id, get_file_info, get_file_path,
+                          remove_file, upload_source_file)
 from service.models import User, db
 from service.task import (create_training_task, get_running_task,
                           get_task_by_id, get_task_info, kill_running_task)
-from util import (data_source_file, failure_response, is_bad_filename,
-                  success_response, validate_not_empty,
-                  validate_positive_integer, validate_safe_name)
+from util import (failure_response, is_bad_filename, success_response,
+                  validate_not_empty, validate_positive_integer,
+                  validate_safe_name)
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -122,11 +122,11 @@ def download_file(file_id):
     if f.owner.id != user.id:
         return failure_response('Access denied.', 403)
 
-    physical_path = data_source_file(f.physical_name)
-    if not os.path.isfile(physical_path):
+    path = get_file_path(f)
+    if not path:
         return failure_response('File is missing on server.', 500)
 
-    return send_file(physical_path, as_attachment=True,
+    return send_file(path, as_attachment=True,
                      attachment_filename=f.original_name)
 
 

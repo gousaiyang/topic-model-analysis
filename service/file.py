@@ -1,6 +1,6 @@
 import os
 
-from util import data_source_file, random_filename
+from util import data_source_file, random_filename, report_file
 
 from .models import File, db
 
@@ -28,6 +28,17 @@ def get_file_info(f):
         'size': f.size,
         'created_at': f.created_at
     }
+
+
+def get_file_path(f):
+    if f.file_type == 'source':
+        path = data_source_file(f.physical_name)
+    elif f.file_type in ('plot', 'report'):
+        path = report_file(f.physical_name)
+    else:
+        path = ''
+
+    return os.path.isfile(path) and path
 
 
 def upload_source_file(f, user):
