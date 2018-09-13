@@ -12,7 +12,7 @@ from service.file import (get_file_by_id, get_file_info, remove_file,
                           upload_source_file)
 from service.models import User, db
 from service.task import (create_training_task, get_running_task,
-                          get_task_by_id, get_task_info)
+                          get_task_by_id, get_task_info, kill_running_task)
 from util import (data_source_file, failure_response, is_bad_filename,
                   success_response, validate_not_empty,
                   validate_positive_integer, validate_safe_name)
@@ -279,3 +279,23 @@ def add_task():
             return success_response(r, 201)
         else:
             return failure_response('A task with the same tag already exists.')
+
+
+@app.route('/api/tasks/running', methods=['DELETE'])
+@login_required
+def terminate_running_task():
+    user = get_current_user()
+
+    task = get_running_task()
+    if not task:
+        return failure_response('No running tasks.', 404)
+    if task.owner.id != user.id:
+        return failure_response('Access denied.', 403)
+
+    kill_running_task()
+    return success_response(status_code=204)
+
+
+@app.route('/api/<path:path>')
+def api_error_handler(path):
+    return failure_response('Invalid API endpoint.', 404)

@@ -8,3 +8,4 @@ __pycache__
 !initdb.py
 !register.py
 *.db
+*.db-journal

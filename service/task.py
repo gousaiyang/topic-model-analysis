@@ -143,3 +143,17 @@ def update_task_status(task, *, code=None, detail=None):
         if detail is not None:
             task.status_detail = detail
         task.save()
+
+
+def kill_running_task():
+    tasks = multiprocessing.active_children()
+    if not tasks:
+        return
+
+    try:
+        tasks[0].terminate()
+    except Exception:
+        pass
+
+    update_task_status(get_task_by_id(tasks[0].task_id), code=STATUS_FAILED,
+                       detail='Terminated by user')
