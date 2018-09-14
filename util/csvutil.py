@@ -10,10 +10,7 @@ def csv_reader(csvfilename, encoding='utf-8'):
     csv.field_size_limit(CSV_FIELD_SIZE_LIMIT)
 
     with open(csvfilename, newline='', encoding=encoding) as csvfile:
-        reader = csv.DictReader(csvfile)
-
-        for row in reader:
-            yield row
+        yield from csv.DictReader(csvfile)
 
 
 def export_csv(data, outfilename, encoding='utf-8'):
