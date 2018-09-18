@@ -8,5 +8,6 @@ __pycache__
 !initdb.py
 !register.py
 !task.py
+!deploy.py
 *.db
 *.db-journal
