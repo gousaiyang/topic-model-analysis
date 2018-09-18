@@ -1,3 +1,6 @@
+import contextlib
+import os
+
 import colorlabels as cl
 
 from scraper import twapi
@@ -9,8 +12,11 @@ USERS_PER_REQ = 100
 def retrieve_user_info(usernames):
     while usernames:
         try:
-            users = twapi.UsersLookup(screen_name=usernames[:USERS_PER_REQ],
-                                      include_entities=False)
+            with open(os.devnull, 'w') as devnull:
+                with contextlib.redirect_stdout(devnull):
+                    users = twapi.UsersLookup(
+                            screen_name=usernames[:USERS_PER_REQ],
+                            include_entities=False)
         except Exception:
             cl.error('Error: %s' % get_exc_line())
             continue

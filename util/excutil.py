@@ -23,4 +23,4 @@ def retry_until_success(func, *args, **kwargs):
         except KeyboardInterrupt:
             cl.warning('User hit Ctrl-C, terminating function %r'
                        % func.__name__)
-            return ret
+            raise
