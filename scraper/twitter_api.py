@@ -19,8 +19,13 @@ credentials = {
     'access_token_secret': config('TWITTER_ACCESS_TOKEN_SECRET')
 }
 
-twapi = twitter.Api(**credentials, application_only_auth=True,
-                    sleep_on_rate_limit=True)
+try:
+    twapi = twitter.Api(**credentials, application_only_auth=True,
+                        sleep_on_rate_limit=True)
+except Exception:
+    cl.warning('Twitter access token is not correctly configured, '
+               'cannot retrieve Twitter data in the official way.')
+    twapi = None
 
 
 def get_full_text(tweet):

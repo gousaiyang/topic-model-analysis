@@ -1,15 +1,19 @@
 import colorlabels as cl
 
 from scraper import twapi
-from util import data_source_file, export_csv, merge_whitespaces
+from util import data_source_file, export_csv, get_exc_line, merge_whitespaces
 
-MAX_USERS_PER_REQ = 100
+USERS_PER_REQ = 100
 
 
 def retrieve_user_info(usernames):
     while usernames:
-        users = twapi.UsersLookup(screen_name=usernames[:MAX_USERS_PER_REQ],
-                                  include_entities=False)
+        try:
+            users = twapi.UsersLookup(screen_name=usernames[:USERS_PER_REQ],
+                                      include_entities=False)
+        except Exception:
+            cl.error('Error: %s' % get_exc_line())
+            continue
 
         for user in users:
             yield {
@@ -29,7 +33,7 @@ def retrieve_user_info(usernames):
                 'description': merge_whitespaces(user.description)
             }
 
-        usernames = usernames[MAX_USERS_PER_REQ:]
+        usernames = usernames[USERS_PER_REQ:]
 
 
 def user_info_retriever(usernames, csvfilename):

@@ -1,3 +1,5 @@
+import os
+
 import colorlabels as cl
 
 from scraper import twapi
@@ -45,3 +47,4 @@ def retweets_recover(csvfilename):
     result = recover_from_csv(csvfilename)
     exportfilename = name_with_title_suffix(csvfilename, '-recovered')
     export_csv(result, exportfilename)
+    return os.path.basename(exportfilename)

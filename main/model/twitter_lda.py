@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import subprocess
 
 import colorlabels as cl
@@ -34,9 +35,10 @@ def run_twlda(show_console_output):
 
 
 def move_result(output_desc):
-    os.rename(twlda_result_file('test'), twlda_result_file(output_desc))
-    os.rename(twlda_base_file(LOGFILE),
-              twlda_result_file('%s/%s' % (output_desc, LOGFILE)))
+    output_dir = twlda_result_file(output_desc)
+    shutil.rmtree(output_dir, ignore_errors=True)
+    os.rename(twlda_result_file('test'), output_dir)
+    os.rename(twlda_base_file(LOGFILE), os.path.join(output_dir, LOGFILE))
 
 
 def twitter_lda(*, output_desc, topics, iteration, alpha_g=None,

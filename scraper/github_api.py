@@ -6,7 +6,12 @@ from github import Github
 
 from util import merge_whitespaces
 
-gh = Github(config('GITHUB_ACCESS_TOKEN'))
+try:
+    gh = Github(config('GITHUB_ACCESS_TOKEN'))
+except Exception:
+    cl.warning('GitHub access token is not correctly configured, '
+               'cannot retrieve GitHub data.')
+    gh = None
 
 
 def get_labels(issue):
