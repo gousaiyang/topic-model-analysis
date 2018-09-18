@@ -21,12 +21,12 @@ if sys.version_info[:2] < (3, 5):
     error_exit('Python 3.5+ required')
 
 
-step('Checking Java installation')
+step('Checking JDK installation')
 
 try:
-    subprocess.check_call(['java', '-version'])
+    subprocess.check_call(['javac', '-version'])
 except Exception:
-    error_exit('Java not installed')
+    error_exit('JDK not installed')
 
 if 'JAVA_HOME' not in os.environ:
     error_exit("'JAVA_HOME' not set")
