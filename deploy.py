@@ -46,7 +46,7 @@ step('Cloning projects')
 
 for d in ('topic-model-analysis', 'Twitter-LDA'):
     if os.path.exists(d):
-        if input('%r already exists, do you want to remove it? (Y/N)' % d).trim().lower() == 'y':
+        if input('%r already exists, do you want to remove it? (Y/N)' % d).strip().lower() == 'y':
             shutil.rmtree(d, ignore_errors=True)
         else:
             error_exit('User canceled deployment')
