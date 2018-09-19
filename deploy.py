@@ -2,8 +2,12 @@ import glob
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
+import urllib
+
+PYTHON = sys.executable
 
 
 def step(message):
@@ -17,8 +21,17 @@ def error_exit(message):
 
 step('Checking Python version')
 
-if sys.version_info[:2] < (3, 5):
-    error_exit('Python 3.5+ required')
+if sys.version_info[:2] < (3, 4):
+    error_exit('Python 3.4+ required')
+
+
+step('Checking pip installation')
+try:
+    subprocess.check_call([PYTHON, '-m', 'pip', '-V'])
+except Exception:
+    print('[!] pip not installed, trying to install...')
+    r = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
+    exec(r.read())
 
 
 step('Checking JDK installation')
@@ -34,6 +47,13 @@ if 'JAVA_HOME' not in os.environ:
 
 step('Cloning projects')
 
+for d in ('topic-model-analysis', 'Twitter-LDA'):
+    if os.path.exists(d):
+        if input('%r already exists, do you want to remove it? (Y/N)' % d).trim().lower() == 'y':
+            shutil.rmtree(d, ignore_errors=True)
+        else:
+            error_exit('User canceled deployment')
+
 subprocess.check_call(['git', 'clone', 'https://github.com/gousaiyang/topic-model-analysis.git'])
 subprocess.check_call(['git', 'clone', 'https://github.com/gousaiyang/Twitter-LDA.git'])
 
@@ -41,7 +61,7 @@ subprocess.check_call(['git', 'clone', 'https://github.com/gousaiyang/Twitter-LD
 step('Installing required modules')
 
 os.chdir('topic-model-analysis')
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+subprocess.check_call([PYTHON, '-m', 'pip', 'install', '-r', 'requirements.txt'])
 os.chdir('..')
 
 
@@ -49,13 +69,9 @@ step('Building Twitter-LDA')
 
 os.chdir('Twitter-LDA')
 sep = ';' if platform.system() == 'Windows' else ':'
-classpath = sep.join(glob.glob('lib/**/*.jar', recursive=True) + ['bin'])
-
+classpath = sep.join(glob.glob('lib/*.jar'))
 os.mkdir('bin')
-
-for f in glob.glob('src/**/*.java', recursive=True):
-    subprocess.check_call(['javac', '-cp', classpath, '-d', 'bin', f])
-
+subprocess.check_call(['javac', '-sourcepath', 'src', '-cp', classpath, '-d', 'bin', 'src/TwitterLDA/TwitterLDAmain.java'])
 os.chdir('..')
 
 
