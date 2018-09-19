@@ -5,7 +5,6 @@ import re
 import shutil
 import subprocess
 import sys
-import urllib
 
 PYTHON = sys.executable
 
@@ -30,6 +29,7 @@ try:
     subprocess.check_call([PYTHON, '-m', 'pip', '-V'])
 except Exception:
     print('[!] pip not installed, trying to install...')
+    import urllib.request
     r = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
     exec(r.read())
 
