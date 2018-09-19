@@ -21,8 +21,8 @@ def error_exit(message):
 
 step('Checking Python version')
 
-if sys.version_info[:2] < (3, 4):
-    error_exit('Python 3.4+ required')
+if sys.version_info[:2] < (3, 5):
+    error_exit('Python 3.5+ required')
 
 
 step('Checking pip installation')
