@@ -10,17 +10,19 @@ from main import (data_retriever, plot_diff_topics, retweets_recover,
 from util import (TimeMeasure, csv_reader, data_source_file, pipe_encoding,
                   retry_until_success)
 
+# Set NO_COLOR=True or NO_COLOR=1 to disable color output.
 if config('NO_COLOR', cast=bool, default=False):
     cl.config(color_span=0)
 
-DATEBACK = datetime.timedelta(weeks=1)
-QUERY = '"java"'
-KEYWORD = 'java'
-PROXY = None
-TWSCRAPE_POOLSIZE = 20
-MIN_TOPICS = 6
-MAX_TOPICS = 30
-ITERATIONS = 4000
+# Parameters
+DATEBACK = datetime.timedelta(weeks=1)  # The date range to collect data.
+QUERY = '"java"'  # Twitter search query string.
+KEYWORD = 'Java'  # Only shown on the final report.
+PROXY = None  # The proxy used to collect Twitter data. (None or 'http://xxx')
+TWSCRAPE_POOLSIZE = 20  # Number of processes for twitterscraper.
+MIN_TOPICS = 6  # Minimum number of topics for training.
+MAX_TOPICS = 30  # Maximum number of topics for training.
+ITERATIONS = 4000  # The number of iterations for training.
 
 
 def get_usernames(tweets_file):
@@ -34,7 +36,7 @@ def main():
     userinfo_file = 'twusers-%s.csv' % tag
     num_topics_range = list(range(MIN_TOPICS, MAX_TOPICS + 1))
 
-    # Retrieve
+    # Retrieve (Scrape + Recover Retweets + Get User Info)
     retry_until_success(data_retriever, 'twitterscraper', QUERY, tweets_file,
                         lang='en', proxy=PROXY, remove_duplicates=False,
                         twscrape_poolsize=TWSCRAPE_POOLSIZE,
@@ -48,13 +50,13 @@ def main():
                         tweet_min_length=2, user_min_tweets=1,
                         remove_duplicates=True)
 
-    # Train
+    # Train (with different number of topics)
     for topics in num_topics_range:
         retry_until_success(twitter_lda, output_desc='%s-%d' % (tag, topics),
                             topics=topics, iteration=ITERATIONS,
                             show_console_output=False)
 
-    # Analyze
+    # Analyze (Perplexity Plot + HTML Reports)
     retry_until_success(plot_diff_topics, num_topics_range, tag,
                         r'Perplexity is ([\d.]+)', pipe_encoding)
     for topics in num_topics_range:
