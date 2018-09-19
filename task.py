@@ -52,9 +52,10 @@ def main():
 
     # Train (with different number of topics)
     for topics in num_topics_range:
+        cl.info('Running with %d topics' % topics)
         retry_until_success(twitter_lda, output_desc='%s-%d' % (tag, topics),
                             topics=topics, iteration=ITERATIONS,
-                            show_console_output=False)
+                            show_console_output=True)
 
     # Analyze (Perplexity Plot + HTML Reports)
     retry_until_success(plot_diff_topics, num_topics_range, tag,

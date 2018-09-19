@@ -31,7 +31,8 @@ def set_parameters(topics, alpha_g, beta_word, beta_b, gamma, iteration):
 
 def run_twlda(show_console_output):
     command_wrapper = tee_command if show_console_output else redirect_command
-    subprocess.call(command_wrapper(COMMAND, LOGFILE), cwd=str(TWLDA_BASE_DIR))
+    subprocess.check_call(command_wrapper(COMMAND, LOGFILE),
+                          cwd=str(TWLDA_BASE_DIR))
 
 
 def move_result(output_desc):
