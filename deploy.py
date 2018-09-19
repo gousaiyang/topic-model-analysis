@@ -7,6 +7,7 @@ import subprocess
 import sys
 
 PYTHON = sys.executable
+IS_WINDOWS = platform.system() == 'Windows'
 
 
 def step(message):
@@ -58,14 +59,19 @@ subprocess.check_call(['git', 'clone', 'https://github.com/gousaiyang/Twitter-LD
 step('Installing required modules')
 
 os.chdir('topic-model-analysis')
-subprocess.check_call([PYTHON, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+
+if IS_WINDOWS:
+    subprocess.check_call([PYTHON, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+else:
+    subprocess.check_call([PYTHON, '-m', 'pip', 'install', '--user', '-r', 'requirements.txt'])
+
 os.chdir('..')
 
 
 step('Building Twitter-LDA')
 
 os.chdir('Twitter-LDA')
-sep = ';' if platform.system() == 'Windows' else ':'
+sep = ';' if IS_WINDOWS else ':'
 classpath = sep.join(glob.glob('lib/*.jar'))
 os.mkdir('bin')
 subprocess.check_call(['javac', '-sourcepath', 'src', '-cp', classpath, '-d', 'bin', 'src/TwitterLDA/TwitterLDAmain.java'])
