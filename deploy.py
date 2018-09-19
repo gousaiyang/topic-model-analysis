@@ -28,10 +28,7 @@ step('Checking pip installation')
 try:
     subprocess.check_call([PYTHON, '-m', 'pip', '-V'])
 except Exception:
-    print('[!] pip not installed, trying to install...')
-    import urllib.request
-    r = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
-    exec(r.read())
+    error_exit('pip not installed')
 
 
 step('Checking JDK installation')
