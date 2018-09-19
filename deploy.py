@@ -63,7 +63,7 @@ os.chdir('topic-model-analysis')
 if IS_WINDOWS:
     subprocess.check_call([PYTHON, '-m', 'pip', 'install', '-r', 'requirements.txt'])
 else:
-    subprocess.check_call([PYTHON, '-m', 'pip', 'install', '--user', '-r', 'requirements.txt'])
+    subprocess.check_call(['sudo', PYTHON, '-m', 'pip', 'install', '-r', 'requirements.txt'])
 
 os.chdir('..')
 
