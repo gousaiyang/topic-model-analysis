@@ -7,7 +7,8 @@ __pycache__
 !app.py
 !initdb.py
 !register.py
-!task.py
+!crawl_task.py
+!train_task.py
 !deploy.py
 *.db
 *.db-journal
