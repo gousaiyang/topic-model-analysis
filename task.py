@@ -60,13 +60,13 @@ def main():
     num_topics_range = list(range(MIN_TOPICS, MAX_TOPICS + 1))
 
     # Retrieve (Scrape + Recover Retweets + Get User Info)
-    retry_until_success(data_retriever, 'twitterscraper', QUERY, tweets_file,
-                        lang='en', proxy=PROXY, remove_duplicates=False,
-                        twscrape_poolsize=TWSCRAPE_POOLSIZE,
-                        twscrape_begindate=datetime.date.today() - DATEBACK)
-    tweets_file_recovered = retry_until_success(retweets_recover, tweets_file)
-    usernames = retry_until_success(get_usernames, tweets_file_recovered)
-    retry_until_success(user_info_retriever, usernames, userinfo_file)
+    data_retriever('twitterscraper', QUERY, tweets_file, lang='en',
+                   proxy=PROXY, remove_duplicates=False,
+                   twscrape_poolsize=TWSCRAPE_POOLSIZE,
+                   twscrape_begindate=datetime.date.today() - DATEBACK)
+    tweets_file_recovered = retweets_recover(tweets_file)
+    usernames = get_usernames(tweets_file_recovered)
+    user_info_retriever(usernames, userinfo_file)
 
     # Preprocess
     retry_until_success(text_preprocessor_twlda, tweets_file_recovered[:-4],
