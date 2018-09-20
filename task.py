@@ -82,11 +82,11 @@ def main():
 
     # Analyze (Perplexity Plot + HTML Reports + Compress)
     report_files = []
-    report_files.append(retry_until_success(plot_diff_topics, num_topics_range,
-                                            tag, r'Perplexity is ([\d.]+)',
-                                            pipe_encoding))
+    report_files.append(plot_diff_topics(num_topics_range, tag,
+                                         r'Perplexity is ([\d.]+)',
+                                         pipe_encoding))
     for topics in num_topics_range:
-        report_files.append(retry_until_success(visualization_twlda, KEYWORD,
+        report_files.append(visualization_twlda(KEYWORD,
                                                 '%s-%d' % (tag, topics),
                                                 '%s-%d' % (tag, topics),
                                                 userinfo_file,
