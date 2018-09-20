@@ -1,5 +1,8 @@
+import contextlib
 import datetime
+import os
 import time
+import zipfile
 
 import colorlabels as cl
 from decouple import config
@@ -8,7 +11,10 @@ from main import (data_retriever, plot_diff_topics, retweets_recover,
                   text_preprocessor_twlda, twitter_lda, user_info_retriever,
                   visualization_twlda)
 from util import (TimeMeasure, csv_reader, data_source_file, pipe_encoding,
-                  retry_until_success)
+                  report_file, retry_until_success)
+
+# Adjust working directory to current script directory (project root).
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Set NO_COLOR=True or NO_COLOR=1 to disable color output.
 if config('NO_COLOR', cast=bool, default=False):
@@ -28,6 +34,23 @@ ITERATIONS = 4000  # The number of iterations for training.
 def get_usernames(tweets_file):
     return list(set(row['user'] for row in
                     csv_reader(data_source_file(tweets_file))))
+
+
+def compress_report_files(tag, report_files):
+    os.chdir(report_file(''))
+    zipfilename = 'ldareport-%s.zip' % tag
+
+    with zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for f in report_files:
+            zf.write(f)
+
+    for f in report_files:
+        with contextlib.suppress(Exception):
+            os.remove(f)
+
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    cl.success('Report files archived into: %s' % zipfilename)
+    return zipfilename
 
 
 def main():
@@ -57,13 +80,18 @@ def main():
                             topics=topics, iteration=ITERATIONS,
                             show_console_output=True)
 
-    # Analyze (Perplexity Plot + HTML Reports)
-    retry_until_success(plot_diff_topics, num_topics_range, tag,
-                        r'Perplexity is ([\d.]+)', pipe_encoding)
+    # Analyze (Perplexity Plot + HTML Reports + Compress)
+    report_files = []
+    report_files.append(retry_until_success(plot_diff_topics, num_topics_range,
+                                            tag, r'Perplexity is ([\d.]+)',
+                                            pipe_encoding))
     for topics in num_topics_range:
-        retry_until_success(visualization_twlda, KEYWORD,
-                            '%s-%d' % (tag, topics), '%s-%d' % (tag, topics),
-                            userinfo_file, open_browser=False)
+        report_files.append(retry_until_success(visualization_twlda, KEYWORD,
+                                                '%s-%d' % (tag, topics),
+                                                '%s-%d' % (tag, topics),
+                                                userinfo_file,
+                                                open_browser=False))
+    compress_report_files(tag, report_files)
 
 
 if __name__ == '__main__':

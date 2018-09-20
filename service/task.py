@@ -1,3 +1,4 @@
+import contextlib
 import json
 import multiprocessing
 import os
@@ -150,10 +151,8 @@ def kill_running_task():
     if not tasks:
         return
 
-    try:
+    with contextlib.suppress(Exception):
         tasks[0].terminate()
-    except Exception:
-        pass
 
     update_task_status(get_task_by_id(tasks[0].task_id), code=STATUS_FAILED,
                        detail='Terminated by user')

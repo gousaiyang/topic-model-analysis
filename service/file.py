@@ -1,3 +1,4 @@
+import contextlib
 import os
 
 from util import data_source_file, random_filename, report_file
@@ -62,7 +63,5 @@ def remove_file(f):
         filepath = data_source_file(f.physical_name)
         f.delete_instance()
 
-    try:
+    with contextlib.suppress(FileNotFoundError):
         os.remove(filepath)
-    except FileNotFoundError:
-        pass
