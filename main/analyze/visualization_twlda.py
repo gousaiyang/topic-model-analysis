@@ -1,4 +1,5 @@
 import ast
+import collections
 import json
 import re
 import time
@@ -29,14 +30,16 @@ def parse_user_topic(desc, encoding='utf-8'):
 
 
 def parse_topic_words(desc, encoding='utf-8'):
-    topic_words = {}
+    topic_words = collections.defaultdict(list)
     logfilename = twlda_result_file('%s/WordsInTopics.txt' % desc)
     content = file_read_contents(logfilename, encoding=encoding)
-    result = re.findall(r'Topic (\d+):' + r'\t(\S+)\t([\d.]+)\n' * 30, content)
 
-    for item in result:
-        topic_words[int(item[0])] = [(word, float(prob)) for word, prob in
-                                     zip(*([iter(item[1:])] * 2))]
+    for topic in content.split('Topic ')[1:]:
+        topic_id, words = topic.split(':')
+        topic_id = int(topic_id)
+        for word in words.strip().split('\n'):
+            w, p = word.strip().split('\t')
+            topic_words[topic_id].append((w, float(p)))
 
     return topic_words
 
