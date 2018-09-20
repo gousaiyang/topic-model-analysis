@@ -50,9 +50,9 @@ def training_task_process(task_id, user_id, tweets_filename, userinfo_filename,
                         show_console_output=False)
 
         update_task_status(task, detail='Analyzing: plotting perplexity')
-        plot_filename = plot_diff_topics(num_topics_range, desc_prefix,
-                                         r'Perplexity is ([\d.]+)',
-                                         pipe_encoding)
+        plot_filename, _ = plot_diff_topics(num_topics_range, desc_prefix,
+                                            r'Perplexity is ([\d.]+)',
+                                            pipe_encoding)
 
         user = User.get_by_id(user_id)
 

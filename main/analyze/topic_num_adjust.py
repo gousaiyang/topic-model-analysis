@@ -35,6 +35,10 @@ def plot_diff_topics(num_topics_range, desc_prefix, regex, encoding='utf-8'):
         data_x.append(topics)
         data_y.append(perplexity)
 
+    minima_points = [data_x[x] for x in range(1, len(data_x) - 1)
+                     if data_y[x - 1] > data_y[x]
+                     and data_y[x] < data_y[x + 1]]
+
     plt.plot(data_x, data_y)
     plt.xticks(num_topics_range)
     plt.figtext(0.5, 0, '* Minima points indicate possibly better training '
@@ -43,4 +47,4 @@ def plot_diff_topics(num_topics_range, desc_prefix, regex, encoding='utf-8'):
 
     plot_filename = 'ldaplot-%s.png' % desc_prefix
     plt.savefig(report_file(plot_filename), bbox_inches='tight')
-    return plot_filename
+    return plot_filename, minima_points

@@ -29,6 +29,7 @@ TWSCRAPE_POOLSIZE = 20  # Number of processes for twitterscraper.
 MIN_TOPICS = 6  # Minimum number of topics for training.
 MAX_TOPICS = 30  # Maximum number of topics for training.
 ITERATIONS = 4000  # The number of iterations for training.
+REPORT_ONLY_MINIMA = True  # Whether only to generate reports at minima points.
 
 
 def get_usernames(tweets_file):
@@ -82,10 +83,13 @@ def main():
 
     # Analyze (Perplexity Plot + HTML Reports + Compress)
     report_files = []
-    report_files.append(plot_diff_topics(num_topics_range, tag,
-                                         r'Perplexity is ([\d.]+)',
-                                         pipe_encoding))
-    for topics in num_topics_range:
+    plot_file, minima_points = plot_diff_topics(num_topics_range, tag,
+                                                r'Perplexity is ([\d.]+)',
+                                                pipe_encoding)
+    report_files.append(plot_file)
+    report_points = minima_points if REPORT_ONLY_MINIMA else num_topics_range
+
+    for topics in report_points:
         report_files.append(visualization_twlda(KEYWORD,
                                                 '%s-%d' % (tag, topics),
                                                 '%s-%d' % (tag, topics),
