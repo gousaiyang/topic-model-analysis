@@ -56,8 +56,8 @@ def compress_report_files(tag, report_files):
 
 def main():
     tag = time.strftime('java-%Y%m%d%H%M%S')
-    tweets_file = 'twdata-%s.csv' % tag
-    userinfo_file = 'twusers-%s.csv' % tag
+    tweets_file = 'twdata-java.csv'
+    userinfo_file = 'twusers-java.csv'
     num_topics_range = list(range(MIN_TOPICS, MAX_TOPICS + 1))
 
     # Retrieve (Scrape + Recover Retweets + Get User Info)
@@ -77,13 +77,13 @@ def main():
     # Train (with different number of topics)
     for topics in num_topics_range:
         cl.info('Running with %d topics' % topics)
-        retry_until_success(twitter_lda, output_desc='%s-%d' % (tag, topics),
+        retry_until_success(twitter_lda, output_desc='java-%d' % topics,
                             topics=topics, iteration=ITERATIONS,
                             show_console_output=True)
 
     # Analyze (Perplexity Plot + HTML Reports + Compress)
     report_files = []
-    plot_file, minima_points = plot_diff_topics(num_topics_range, tag,
+    plot_file, minima_points = plot_diff_topics(num_topics_range, 'java',
                                                 r'Perplexity is ([\d.]+)',
                                                 pipe_encoding)
     report_files.append(plot_file)
@@ -91,7 +91,7 @@ def main():
 
     for topics in report_points:
         report_files.append(visualization_twlda(KEYWORD,
-                                                '%s-%d' % (tag, topics),
+                                                'java-%d' % topics,
                                                 '%s-%d' % (tag, topics),
                                                 userinfo_file,
                                                 open_browser=False))
