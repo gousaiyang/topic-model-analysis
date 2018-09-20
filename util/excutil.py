@@ -17,7 +17,7 @@ def retry_until_success(func, *args, **kwargs):
             except KeyboardInterrupt:
                 raise
             except Exception:
-                cl.error('Error: %s. Retrying...' % get_exc_line())
+                cl.error('Error: %s\nRetrying...' % traceback.format_exc())
             else:
                 return ret
         except KeyboardInterrupt:
