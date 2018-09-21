@@ -22,7 +22,7 @@ DAYS = 7
 # Get `DAYS` from `argv`.
 if len(sys.argv) > 1:
     with contextlib.suppress(ValueError):
-        DAYS = int(sys.argv[1])
+        DAYS = max(int(sys.argv[1]), 1)
 
 DATEBACK = datetime.timedelta(days=DAYS)  # The date range to collect data.
 QUERY = '"java"'  # Twitter search query string.
