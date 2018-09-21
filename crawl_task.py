@@ -1,5 +1,7 @@
+import contextlib
 import datetime
 import os
+import sys
 
 import colorlabels as cl
 from decouple import config
@@ -15,7 +17,14 @@ if config('NO_COLOR', cast=bool, default=False):
     cl.config(color_span=0)
 
 # Parameters
-DATEBACK = datetime.timedelta(weeks=1)  # The date range to collect data.
+DAYS = 7
+
+# Get `DAYS` from `argv`.
+if len(sys.argv) > 1:
+    with contextlib.suppress(ValueError):
+        DAYS = int(sys.argv[1])
+
+DATEBACK = datetime.timedelta(days=DAYS)  # The date range to collect data.
 QUERY = '"java"'  # Twitter search query string.
 PROXY = None  # The proxy used to collect Twitter data. (None or 'http://xxx')
 TWSCRAPE_POOLSIZE = 20  # Number of processes for twitterscraper.
